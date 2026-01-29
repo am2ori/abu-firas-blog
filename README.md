@@ -114,6 +114,38 @@ firebase deploy
 
 هذا المشروع خاص بـ **عبدالعظيم أبو فراس**.
 
+## Deployment Rules (Vercel + Firebase)
+
+**⚠️ Critical deployment configuration - MUST follow these rules:**
+
+- **NEVER** use `output: 'export'` in `next.config.ts` - this is a Vercel deployment, not static export
+- **Build script**: Must always be `"build": "next build"` in `package.json` - no `next export` 
+- **Environment variables management**:
+  - Local development: Use `.env.local` file
+  - Production/Preview: Add in Vercel → Project → Settings → Environment Variables
+  - Required Firebase env vars (exact names):
+    - `NEXT_PUBLIC_FIREBASE_API_KEY`
+    - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+    - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+    - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+    - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+    - `NEXT_PUBLIC_FIREBASE_APP_ID`
+- **Pre-push workflow**: Always run `npm run build` locally before any `git push`
+- **Firebase env vars**: Never rename or delete without updating Vercel environment variables too
+
+## AI Agents Instructions (OpenCode, Antigravity, etc.)
+
+**🤖 Rules for AI agents working on this repo:**
+
+- Read the `Deployment Rules` section above BEFORE modifying any config or deployment code
+- **NEVER** enable static export or add `output: 'export'` to `next.config.ts`
+- Preserve existing environment variable naming conventions when adding new Firebase vars
+- After changing config files or dependencies, ALWAYS run `npm run build` and ensure it passes before committing
+- Explain any breaking changes clearly in commit messages
+- Don't modify deployment settings without understanding the Vercel + Firebase setup
+
+See [PROJECT_SKILLS.md](./PROJECT_SKILLS.md) for AI/tool-specific guidance.
+
 ---
 
 **صُنع بحب في Google Antigravity 🚀**
