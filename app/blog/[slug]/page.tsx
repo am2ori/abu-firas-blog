@@ -2,9 +2,11 @@ import { notFound } from "next/navigation";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import MarkdownViewer from "@/components/markdown-viewer";
+import ShareButtons from "@/components/share-buttons";
+import SuggestedPosts from "@/components/suggested-posts";
 import { Post } from "@/types";
 
-import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 // Fetch post from Firestore by slug
@@ -52,6 +54,59 @@ async function getPost(rawSlugOrId: string): Promise<Post | null> {
     }
 }
 
+// Fetch suggested posts based on tags or category
+async function getSuggestedPosts(currentPost: Post): Promise<Post[]> {
+    try {
+        const postsRef = collection(db, "posts");
+        
+        // Try to find posts with similar tags first
+        if (currentPost.tags && currentPost.tags.length > 0) {
+            const tagQueries = currentPost.tags.map(tag => 
+                query(postsRef, where("tags", "array-contains", tag), where("published", "==", true), limit(10))
+            );
+            
+            const snapshots = await Promise.all(tagQueries.map(q => getDocs(q)));
+            const allPosts: Post[] = [];
+            
+            snapshots.forEach(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    const post = { id: doc.id, ...doc.data() } as Post;
+                    if (post.id !== currentPost.id) {
+                        allPosts.push(post);
+                    }
+                });
+            });
+            
+            // Remove duplicates and limit to 4 posts
+            const uniquePosts = allPosts.filter((post, index, self) => 
+                index === self.findIndex(p => p.id === post.id)
+            );
+            
+            if (uniquePosts.length >= 2) {
+                return uniquePosts.slice(0, 4);
+            }
+        }
+        
+        // Fallback: Get posts from same category
+        const categoryQuery = query(
+            postsRef, 
+            where("categoryId", "==", currentPost.categoryId), 
+            where("published", "==", true),
+            limit(6)
+        );
+        const categorySnapshot = await getDocs(categoryQuery);
+        
+        const categoryPosts = categorySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Post))
+            .filter(post => post.id !== currentPost.id);
+        
+        return categoryPosts.slice(0, 4);
+    } catch (error) {
+        console.error("[getSuggestedPosts] Error:", error);
+        return [];
+    }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const post = await getPost(slug);
@@ -71,6 +126,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         notFound();
     }
 
+    // Get suggested posts
+    const suggestedPosts = await getSuggestedPosts(post);
+    
+    // Build the full URL for sharing
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.abufiras.com';
+    const fullUrl = `${baseUrl}/blog/${post.slug}`;
+
     return (
         <div className="min-h-screen flex flex-col font-sans">
             <Header />
@@ -85,6 +147,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <h1 className="text-4xl font-bold text-stone-900 leading-tight mb-4">{post.title}</h1>
                 </header>
 
+                {/* Cover Image Inside Post */}
+                {post.featuredImageUrl && (
+                    <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
+                        <img
+                            src={post.featuredImageUrl}
+                            alt={post.title}
+                            className="w-full h-auto max-h-96 object-cover"
+                        />
+                    </div>
+                )}
+
                 <MarkdownViewer content={post.contentMarkdown} />
 
                 <div className="mt-12 pt-8 border-t border-stone-200">
@@ -95,6 +168,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         ))}
                     </div>
                 </div>
+
+                {/* Share Section - moved to end of article */}
+                <div className="mt-8 pt-6 border-t border-stone-100">
+                    <ShareButtons url={fullUrl} title={post.title} />
+                </div>
+
+                {/* Suggested Posts */}
+                <SuggestedPosts suggestedPosts={suggestedPosts} />
             </main>
 
             <Footer />

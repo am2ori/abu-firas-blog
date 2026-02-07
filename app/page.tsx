@@ -51,10 +51,11 @@ export default function Home() {
         posts.forEach(p => p.tags?.forEach(t => tags.add(t)));
         setAllTags(Array.from(tags));
 
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error fetching home data:", error);
-        setError(`حدث خطأ أثناء تحميل البيانات: ${error.message || 'خطأ غير معروف'}`);
-        if (error.message?.includes('index')) {
+        const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
+        setError(`حدث خطأ أثناء تحميل البيانات: ${errorMessage}`);
+        if (errorMessage.includes('index')) {
           setError('⚠️ يحتاج هذا القسم إلى "فهرس" (Index) في Firebase ليعمل. افتح الكونسول (F12) واضغط على الرابط لإنشائه.');
         }
       } finally {

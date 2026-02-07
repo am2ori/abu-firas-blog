@@ -8,9 +8,10 @@ import { stripMarkdown } from '@/lib/seo';
 import { timestampToInputString, inputStringToTimestamp, nowToInputString } from '@/lib/date';
 import { db } from '@/lib/firebase';
 import { Post, Category } from '@/types';
-import { getCategories } from '@/lib/categories';
+import { getCategories, addCategory } from '@/lib/categories';
 import { generateSlug, checkSlugUnique } from '@/lib/slug';
 import { validateImageFile } from '@/lib/image';
+import TagInput from '@/components/tag-input';
 
 
 
@@ -37,15 +38,18 @@ export default function PostForm({ post }: PostFormProps) {
 
     // Categories State
     const [categories, setCategories] = useState<Category[]>([]);
+    const [showNewCategoryForm, setShowNewCategoryForm] = useState(false);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [newCategorySlug, setNewCategorySlug] = useState('');
+    const [isAddingCategory, setIsAddingCategory] = useState(false);
 
     // Tags State
     const [tags, setTags] = useState<string[]>(post?.tags || []);
-    const [currentTag, setCurrentTag] = useState('');
 
     const [seoTitle, setSeoTitle] = useState(post?.seo_title || '');
     const [seoDesc, setSeoDesc] = useState(post?.seo_description || '');
     const [published, setPublished] = useState(post?.published || false);
-    const [createdAt, setCreatedAt] = useState(post?.createdAt ? timestampToInputString(post.createdAt) : nowToInputString());
+    const [createdAt] = useState(post?.createdAt ? timestampToInputString(post.createdAt) : nowToInputString());
     const [publishedAt, setPublishedAt] = useState(post?.publishedAt ? timestampToInputString(post.publishedAt) : '');
     const [imageUrl, setImageUrl] = useState(post?.featuredImageUrl || '');
 
@@ -67,7 +71,45 @@ export default function PostForm({ post }: PostFormProps) {
             }
         }
         fetchCats();
-    }, []);
+    }, [category, post]);
+
+    // Auto-generate slug for new category
+    useEffect(() => {
+        if (newCategoryName) {
+            const slug = generateSlug(newCategoryName);
+            setNewCategorySlug(slug);
+        }
+    }, [newCategoryName]);
+
+    // Handle adding new category
+    const handleAddNewCategory = async () => {
+        if (!newCategoryName.trim()) return;
+
+        setIsAddingCategory(true);
+        try {
+            const categoryId = await addCategory({
+                name: newCategoryName.trim(),
+                slug: newCategorySlug,
+            });
+
+            // Refresh categories list
+            const updatedCategories = await getCategories();
+            setCategories(updatedCategories);
+            
+            // Select the newly added category
+            setCategory(categoryId);
+            
+            // Reset form
+            setNewCategoryName('');
+            setNewCategorySlug('');
+            setShowNewCategoryForm(false);
+        } catch (error) {
+            console.error('Error adding category:', error);
+            alert('حدث خطأ أثناء إضافة التصنيف. يرجى المحاولة مرة أخرى.');
+        } finally {
+            setIsAddingCategory(false);
+        }
+    };
 
     // Auto-generate slug from title
     useEffect(() => {
@@ -124,30 +166,8 @@ export default function PostForm({ post }: PostFormProps) {
         setIsSeoDescModified(val.length > 0);
     };
 
-    const handleAddTag = (e?: React.MouseEvent | React.KeyboardEvent) => {
-        if (e) e.preventDefault();
-
-        const tag = currentTag.trim();
-        if (!tag) return;
-
-        if (tags.includes(tag)) {
-            setCurrentTag(''); // Clear if duplicate to avoid confusion, or keep it? Let's clear and maybe shake? Just clearing for now.
-            return;
-        }
-
-        setTags([...tags, tag]);
-        setCurrentTag('');
-    };
-
-    const handleRemoveTag = (tagToRemove: string) => {
-        setTags(tags.filter(t => t !== tagToRemove));
-    };
-
-    const handleTagKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleAddTag();
-        }
+    const handleTagsChange = (newTags: string[]) => {
+        setTags(newTags);
     };
 
     const handlePublishedChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -441,64 +461,95 @@ export default function PostForm({ post }: PostFormProps) {
                         <div>
                             <label className="block text-sm font-medium text-stone-700 mb-1">التصنيف</label>
                             {categories.length > 0 ? (
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full px-3 py-2 rounded border border-stone-200 focus:ring-amber-500 focus:border-amber-500 outline-none"
-                                >
-                                    <option value="" disabled>اختر تصنيفاً...</option>
-                                    {categories.map((cat) => (
-                                        <option key={cat.id} value={cat.id}>
-                                            {cat.name}
+                                <div className="space-y-2">
+                                    <select
+                                        value={category}
+                                        onChange={(e) => {
+                                            if (e.target.value === 'new') {
+                                                setShowNewCategoryForm(true);
+                                            } else {
+                                                setCategory(e.target.value);
+                                                setShowNewCategoryForm(false);
+                                            }
+                                        }}
+                                        className="w-full px-3 py-2 rounded border border-stone-200 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                                    >
+                                        <option value="" disabled>اختر تصنيفاً...</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.name}
+                                            </option>
+                                        ))}
+                                        <option value="new" className="text-amber-700 font-medium">
+                                            + إضافة تصنيف جديد
                                         </option>
-                                    ))}
-                                </select>
+                                    </select>
+                                </div>
                             ) : (
                                 <div className="text-sm text-stone-500 border border-stone-200 rounded p-2 bg-stone-50">
                                     جاري تحميل التصنيفات...
+                                </div>
+                            )}
+
+                            {/* New Category Form */}
+                            {showNewCategoryForm && (
+                                <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
+                                    <h4 className="text-sm font-medium text-amber-900">إضافة تصنيف جديد</h4>
+                                    
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-700 mb-1">اسم التصنيف</label>
+                                        <input
+                                            type="text"
+                                            value={newCategoryName}
+                                            onChange={(e) => setNewCategoryName(e.target.value)}
+                                            className="w-full px-3 py-2 rounded border border-amber-200 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm"
+                                            placeholder="مثال: التقنية، السفر..."
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-medium text-stone-700 mb-1">الرابط (Slug)</label>
+                                        <input
+                                            type="text"
+                                            value={newCategorySlug}
+                                            onChange={(e) => setNewCategorySlug(e.target.value)}
+                                            className="w-full px-3 py-2 rounded border border-amber-200 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm bg-stone-50 text-stone-600 ltr text-right"
+                                            dir="ltr"
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={handleAddNewCategory}
+                                            disabled={isAddingCategory || !newCategoryName.trim()}
+                                            className="px-3 py-1.5 bg-amber-700 text-white rounded text-sm hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            {isAddingCategory ? 'جاري الإضافة...' : 'إضافة التصنيف'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setShowNewCategoryForm(false);
+                                                setNewCategoryName('');
+                                                setNewCategorySlug('');
+                                            }}
+                                            className="px-3 py-1.5 bg-stone-300 text-stone-700 rounded text-sm hover:bg-stone-400"
+                                        >
+                                            إلغاء
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-stone-700 mb-2">الوسوم</label>
-
-                            <div className="flex gap-2 mb-3">
-                                <input
-                                    type="text"
-                                    value={currentTag}
-                                    onChange={(e) => setCurrentTag(e.target.value)}
-                                    onKeyDown={handleTagKeyDown}
-                                    className="flex-1 min-w-0 px-3 py-2 rounded border border-stone-200 focus:ring-amber-500 focus:border-amber-500 outline-none text-sm"
-                                    placeholder="أضف وسماً..."
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleAddTag}
-                                    className="px-3 py-2 bg-stone-100 text-stone-600 rounded hover:bg-stone-200 transition-colors"
-                                >
-                                    +
-                                </button>
-                            </div>
-
-                            <div className="flex flex-wrap gap-2">
-                                {tags.map(tag => (
-                                    <span key={tag} className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-sm border border-amber-100">
-                                        {tag}
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveTag(tag)}
-                                            className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-amber-200 text-amber-700 leading-none pb-0.5"
-                                            title="حذف الوسم"
-                                        >
-                                            ×
-                                        </button>
-                                    </span>
-                                ))}
-                                {tags.length === 0 && (
-                                    <span className="text-xs text-stone-400 italic">لا توجد وسوم مضافة</span>
-                                )}
-                            </div>
+                            <TagInput 
+                                selectedTags={tags}
+                                onTagsChange={handleTagsChange}
+                                placeholder="أضف وسماً..."
+                            />
                         </div>
                     </div>
 

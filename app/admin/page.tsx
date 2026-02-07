@@ -5,13 +5,14 @@ import Link from 'next/link';
 import { collection, getDocs, query, where, orderBy, limit, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Post } from '@/types';
-import { FileText, CheckCircle, FileClock, FolderOpen, ArrowRight, PenTool } from 'lucide-react';
+import { FileText, CheckCircle, FileClock, FolderOpen, ArrowRight, PenTool, Tag } from 'lucide-react';
 
 interface DashboardStats {
     totalPosts: number;
     publishedPosts: number;
     draftPosts: number;
     categoriesCount: number;
+    tagsCount: number;
 }
 
 export default function AdminDashboard() {
@@ -19,7 +20,8 @@ export default function AdminDashboard() {
         totalPosts: 0,
         publishedPosts: 0,
         draftPosts: 0,
-        categoriesCount: 0
+        categoriesCount: 0,
+        tagsCount: 0
     });
     const [recentPosts, setRecentPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
@@ -41,6 +43,7 @@ export default function AdminDashboard() {
                 // Collections references
                 const postsColl = collection(db, 'posts');
                 const catsColl = collection(db, 'categories');
+                const tagsColl = collection(db, 'tags');
 
                 // 1. Get Counts
                 // Note: getCountFromServer is efficient for counting
@@ -50,6 +53,7 @@ export default function AdminDashboard() {
                 const publishedSnapshot = await getCountFromServer(publishedQuery);
 
                 const catsSnapshot = await getCountFromServer(catsColl);
+                const tagsSnapshot = await getCountFromServer(tagsColl);
 
                 const total = totalPostsSnapshot.data().count;
                 const published = publishedSnapshot.data().count;
@@ -58,7 +62,8 @@ export default function AdminDashboard() {
                     totalPosts: total,
                     publishedPosts: published,
                     draftPosts: total - published,
-                    categoriesCount: catsSnapshot.data().count
+                    categoriesCount: catsSnapshot.data().count,
+                    tagsCount: tagsSnapshot.data().count
                 });
 
                 // 2. Get Recent Posts
@@ -90,7 +95,7 @@ export default function AdminDashboard() {
             <h1 className="text-3xl font-bold text-stone-800">{greeting}</h1>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
                     <div className="p-3 bg-blue-50 text-blue-600 rounded-full mb-3">
                         <FileText size={24} />
@@ -121,6 +126,14 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-2xl font-bold text-stone-800">{stats.categoriesCount}</div>
                     <div className="text-sm text-stone-500">تصانيف</div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl border border-stone-200 shadow-sm flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow">
+                    <div className="p-3 bg-pink-50 text-pink-600 rounded-full mb-3">
+                        <Tag size={24} />
+                    </div>
+                    <div className="text-2xl font-bold text-stone-800">{stats.tagsCount}</div>
+                    <div className="text-sm text-stone-500">وسوم</div>
                 </div>
             </div>
 
@@ -177,6 +190,12 @@ export default function AdminDashboard() {
                             className="block w-full py-3 px-4 bg-white border border-stone-200 text-stone-700 rounded-lg text-center font-medium hover:bg-stone-50 transition-colors"
                         >
                             + تصنيف جديد
+                        </Link>
+                        <Link
+                            href="/admin/tags/new"
+                            className="block w-full py-3 px-4 bg-white border border-stone-200 text-stone-700 rounded-lg text-center font-medium hover:bg-stone-50 transition-colors"
+                        >
+                            + وسم جديد
                         </Link>
                         <Link
                             href="/"

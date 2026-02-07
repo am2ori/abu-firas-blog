@@ -9,16 +9,28 @@ export default function CategoriesPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
-
     async function fetchCategories() {
         setLoading(true);
         const data = await getCategories();
         setCategories(data);
         setLoading(false);
     }
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await getCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error("Error loading categories:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        setLoading(true);
+        loadCategories();
+    }, []);
 
     async function handleDelete(id: string) {
         if (!confirm('هل أنت متأكد من حذف هذا التصنيف؟')) return;

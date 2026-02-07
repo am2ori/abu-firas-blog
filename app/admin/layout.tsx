@@ -9,8 +9,8 @@ import { logout } from '@/lib/auth';
 import {
     LayoutDashboard,
     FileText,
-    PlusCircle,
     FolderOpen,
+    Tag,
     ExternalLink,
     LogOut,
     Menu,
@@ -43,8 +43,13 @@ export default function AdminLayout({
 
     // Close mobile menu on route change
     useEffect(() => {
-        setIsMobileMenuOpen(false);
-    }, [pathname]);
+        const timer = setTimeout(() => {
+            if (isMobileMenuOpen) {
+                setIsMobileMenuOpen(false);
+            }
+        }, 0);
+        return () => clearTimeout(timer);
+    }, [pathname, isMobileMenuOpen]);
 
     const handleLogout = async () => {
         await logout();
@@ -63,6 +68,7 @@ export default function AdminLayout({
         { name: 'الرئيسية', href: '/admin', icon: LayoutDashboard },
         { name: 'كل المقالات', href: '/admin/posts', icon: FileText },
         { name: 'التصنيفات', href: '/admin/categories', icon: FolderOpen },
+        { name: 'الوسوم', href: '/admin/tags', icon: Tag },
     ];
 
     return (

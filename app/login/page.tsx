@@ -20,7 +20,7 @@ export default function LoginPage() {
         try {
             await login(email, password);
             router.push('/admin');
-        } catch (err: any) {
+        } catch (err: unknown) {
             if (err instanceof FirebaseError) {
                 setError('فشل تسجيل الدخول: تحقق من البريد الإلكتروني أو كلمة المرور.');
             } else {
