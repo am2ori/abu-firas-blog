@@ -1,0 +1,21 @@
+# Robots.txt for وميض الكتابة - Abu Firas Blog
+# https://blog.abufiras.com
+
+User-agent: *
+Allow: /
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /login/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Allow specific API routes that might be public (if any)
+# Allow: /api/public-route
+
+# Sitemap location
+Sitemap: https://blog.abufiras.com/sitemap.xml
+
+# Crawl delay (optional, be respectful)
+Crawl-delay: 1
