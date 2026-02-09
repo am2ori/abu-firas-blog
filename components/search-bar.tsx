@@ -17,22 +17,50 @@ export default function SearchBar() {
         }
     };
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value);
+    };
+
     return (
-        <form onSubmit={handleSubmit} className="w-full max-w-md">
+        <form onSubmit={handleSubmit} className="w-full" noValidate>
             <div className="relative">
+                <label htmlFor="search-input" className="sr-only">
+                    ابحث في المقالات
+                </label>
                 <input
-                    type="text"
+                    id="search-input"
+                    type="search"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={handleInputChange}
                     placeholder="ابحث في المقالات..."
-                    className="w-full px-4 py-3 pr-12 rounded-lg border border-stone-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all text-stone-900 bg-white shadow-sm"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck="false"
+                    className="
+                        w-full px-4 py-3 pr-12 rounded-lg 
+                        border border-stone-200 bg-white shadow-sm
+                        focus:border-amber-500 focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 
+                        outline-none transition-all duration-200
+                        text-stone-900 placeholder-stone-400
+                        hover:border-stone-300
+                    "
+                    aria-describedby="search-description"
                 />
+                <div id="search-description" className="sr-only">
+                    أدخل كلمات مفتاحية للبحث في مقالات المدونة
+                </div>
                 <button
                     type="submit"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 p-2 text-stone-400 hover:text-amber-800 transition-colors"
-                    aria-label="بحث"
+                    className="
+                        absolute left-2 top-1/2 -translate-y-1/2 p-2 
+                        text-stone-400 hover:text-amber-600 hover:bg-amber-50 
+                        rounded-lg transition-all duration-200
+                        focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1
+                    "
+                    aria-label="ابحث في المقالات"
+                    disabled={!query.trim()}
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </button>
