@@ -8,7 +8,7 @@ import {
     getDoc,
     query,
     orderBy,
-    Timestamp
+    serverTimestamp
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Category } from "@/types";
@@ -47,21 +47,40 @@ export async function getCategory(id: string): Promise<Category | null> {
 
 // Add new category
 export async function addCategory(data: Partial<Category>): Promise<string> {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-        ...data,
-        createdAt: Timestamp.now(),
-    });
-    return docRef.id;
+    try {
+        const docRef = await addDoc(collection(db, COLLECTION_NAME), {
+            ...data,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error("Error adding category:", error);
+        throw error;
+    }
 }
 
 // Update category
 export async function updateCategory(id: string, data: Partial<Category>): Promise<void> {
-    const docRef = doc(db, COLLECTION_NAME, id);
-    await updateDoc(docRef, data);
+    try {
+        const docRef = doc(db, COLLECTION_NAME, id);
+        await updateDoc(docRef, {
+            ...data,
+            updatedAt: serverTimestamp(),
+        });
+    } catch (error) {
+        console.error("Error updating category:", error);
+        throw error;
+    }
 }
 
 // Delete category
 export async function deleteCategory(id: string): Promise<void> {
-    const docRef = doc(db, COLLECTION_NAME, id);
-    await deleteDoc(docRef);
+    try {
+        const docRef = doc(db, COLLECTION_NAME, id);
+        await deleteDoc(docRef);
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        throw error;
+    }
 }

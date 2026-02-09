@@ -15,12 +15,10 @@ const firebaseConfig = {
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 
-// Initialize Firestore with long-polling to avoid offline errors in some environments
+// Initialize Firestore — using default WebSocket transport for best performance
 let db: Firestore;
 try {
-    db = initializeFirestore(app, {
-        experimentalForceLongPolling: true,
-    });
+    db = initializeFirestore(app, {});
 } catch (e) {
     db = getFirestore(app);
 }

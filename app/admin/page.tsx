@@ -186,22 +186,22 @@ export default function AdminDashboard() {
     ];
 
     return (
-        <div className="space-y-8 animate-fade-in-up">
+        <div className="space-y-6 animate-fade-in-up">
             {/* Welcome Header */}
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-8 border border-amber-100">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-6 md:p-8 border border-amber-100">
                 <h1 className="text-3xl font-bold text-stone-900 mb-2">{greeting}</h1>
                 <p className="text-stone-600">مرحباً بك في لوحة التحكم. إليك ملخص لأحدث نشاطاتك.</p>
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {statCards.map((stat, index) => {
                     const Icon = stat.icon;
                     return (
                         <div
                             key={stat.title}
                             className="
-                                bg-white p-6 rounded-xl border border-stone-200 
+                                bg-white p-4 sm:p-6 rounded-xl border border-stone-200 
                                 hover:shadow-card hover:border-stone-300 
                                 transition-all duration-300 group cursor-pointer
                             "
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Main Content Grid */}
-            <div className="grid lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                 {/* Recent Posts */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex items-center justify-between">

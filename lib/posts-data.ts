@@ -6,7 +6,7 @@ import { db } from "@/lib/firebase";
 export async function getPosts(page = 1, limit = 12, startAfterDoc?: QueryDocumentSnapshot) {
     try {
         const postsRef = collection(db, "posts");
-        
+
         // Build the query
         let q = query(
             postsRef,
@@ -14,18 +14,18 @@ export async function getPosts(page = 1, limit = 12, startAfterDoc?: QueryDocume
             orderBy("publishedAt", "desc"),
             limitFn(limit)
         );
-        
+
         // Add cursor for pagination (not for first page)
         if (startAfterDoc && page > 1) {
             q = query(q, startAfter(startAfterDoc));
         }
-        
+
         const snapshot = await getDocs(q);
         const posts = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Post[];
-        
+
         return {
             posts,
             lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
@@ -65,15 +65,15 @@ export async function searchPosts(searchQuery: string, page = 1, limit = 12) {
             postsRef,
             where("published", "==", true),
             orderBy("publishedAt", "desc"),
-            limitFn(limit * 3) // Fetch more to allow client-side filtering
+            limitFn(limit * 2) // Fetch 2x to allow client-side filtering (reduced from 3x)
         );
-        
+
         const snapshot = await getDocs(q);
         let posts = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         })) as Post[];
-        
+
         // Client-side search filtering
         if (searchQuery) {
             const queryLower = searchQuery.toLowerCase();
@@ -83,11 +83,11 @@ export async function searchPosts(searchQuery: string, page = 1, limit = 12) {
                 post.tags?.some(tag => tag.toLowerCase().includes(queryLower))
             );
         }
-        
+
         // Apply pagination
         const startIndex = (page - 1) * limit;
         const paginatedPosts = posts.slice(startIndex, startIndex + limit);
-        
+
         return {
             posts: paginatedPosts,
             total: posts.length,
@@ -103,17 +103,4 @@ export async function searchPosts(searchQuery: string, page = 1, limit = 12) {
     }
 }
 
-// Fetch Categories
-export async function getCategories(): Promise<Category[]> {
-    try {
-        const catsRef = collection(db, 'categories');
-        const snapshot = await getDocs(catsRef);
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        })) as Category[];
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-        return [];
-    }
-}
+// Note: getCategories is imported from @/lib/categories — no duplicate here

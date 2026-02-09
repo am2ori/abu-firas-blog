@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { logout } from '@/lib/auth';
+
 import {
     LayoutDashboard,
     FileText,
@@ -16,9 +17,10 @@ import {
     Menu,
     X,
     Settings,
-    BarChart3,
     Home,
-    UserCircle
+    UserCircle,
+    PanelRightOpen,
+    PanelRightClose
 } from 'lucide-react';
 
 export default function AdminLayout({
@@ -48,13 +50,8 @@ export default function AdminLayout({
 
     // Close mobile menu on route change
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (isMobileMenuOpen) {
-                setIsMobileMenuOpen(false);
-            }
-        }, 0);
-        return () => clearTimeout(timer);
-    }, [pathname, isMobileMenuOpen]);
+        setIsMobileMenuOpen(false);
+    }, [pathname]);
 
     const handleLogout = async () => {
         await logout();
@@ -81,7 +78,6 @@ export default function AdminLayout({
             title: 'الرئيسية',
             items: [
                 { name: 'نظرة عامة', href: '/admin', icon: Home },
-                { name: 'الإحصائيات', href: '/admin/analytics', icon: BarChart3 },
             ]
         },
         {
@@ -96,13 +92,13 @@ export default function AdminLayout({
             title: 'الإعدادات',
             items: [
                 { name: 'الملف الشخصي', href: '/admin/profile', icon: UserCircle },
-                { name: 'إعدادات الموقع', href: '/admin/settings', icon: Settings },
+                { name: 'الإعدادات', href: '/admin/settings', icon: Settings },
             ]
         }
     ];
 
     return (
-        <div className="min-h-screen bg-stone-50 font-sans">
+        <div className="min-h-screen bg-stone-50 font-sans md:flex">
             {/* Mobile Header */}
             <header className="md:hidden bg-white border-b border-stone-200 sticky top-0 z-50">
                 <div className="flex items-center justify-between p-4">
@@ -134,45 +130,75 @@ export default function AdminLayout({
 
             {/* Sidebar */}
             <aside className={`
-                fixed md:sticky inset-y-0 right-0 z-50
+                fixed md:sticky inset-y-0 right-0 top-0 z-[60] md:z-50
                 bg-white border-l border-stone-200 shadow-elevated
                 transform transition-all duration-300 ease-in-out
+                h-screen md:flex-shrink-0 flex flex-col overflow-hidden
                 ${sidebarCollapsed ? 'w-20' : 'w-72'}
                 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
             `}>
                 {/* Desktop Header */}
-                <div className="hidden md:flex items-center justify-between p-6 border-b border-stone-100">
-                    <div className={`transition-all duration-300 ${sidebarCollapsed ? 'w-full text-center' : ''}`}>
-                        <Link 
-                            href="/admin" 
-                            className="flex items-center gap-3 text-amber-600 hover:text-amber-700 transition-colors"
-                        >
-                            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <LayoutDashboard size={24} />
-                            </div>
-                            {!sidebarCollapsed && (
-                                <span className="font-bold text-lg">لوحة التحكم</span>
-                            )}
-                        </Link>
-                    </div>
+                <div className={`
+                    hidden md:flex border-b border-stone-100 transition-all duration-300
+                    ${sidebarCollapsed
+                        ? 'flex-col items-center gap-3 p-4'
+                        : 'items-center justify-between p-6'
+                    }
+                `}>
+                    <Link
+                        href="/admin"
+                        className={`
+                            flex items-center text-amber-600 hover:text-amber-700 transition-colors
+                            ${sidebarCollapsed ? 'justify-center' : 'gap-3'}
+                        `}
+                    >
+                        <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <LayoutDashboard size={24} />
+                        </div>
+                        {!sidebarCollapsed && (
+                            <span className="font-bold text-lg">لوحة التحكم</span>
+                        )}
+                    </Link>
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className="hidden md:block p-1 rounded hover:bg-stone-100 transition-colors"
+                        className={`
+                            p-2 rounded-lg hover:bg-stone-100 transition-all duration-200
+                            text-stone-400 hover:text-stone-600
+                            ${sidebarCollapsed ? 'w-10 h-10 flex items-center justify-center' : ''}
+                        `}
                         aria-label="طي/توسيع الشريط الجانبي"
                     >
-                        <Menu size={20} className={sidebarCollapsed ? 'rotate-180' : ''} />
+                        {sidebarCollapsed
+                            ? <PanelRightOpen size={20} />
+                            : <PanelRightClose size={20} />
+                        }
                     </button>
                 </div>
 
-                {/* Mobile User Info */}
-                <div className="md:hidden p-6 border-b border-stone-100">
+                {/* Mobile Header (Close button + user info) */}
+                <div className="md:hidden p-4 border-b border-stone-100">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                                <LayoutDashboard size={24} className="text-amber-600" />
+                            </div>
+                            <span className="font-bold text-lg text-amber-600">لوحة التحكم</span>
+                        </div>
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="p-2 rounded-lg hover:bg-stone-100 transition-colors text-stone-500"
+                            aria-label="إغلاق القائمة"
+                        >
+                            <X size={24} />
+                        </button>
+                    </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                            <UserCircle size={24} className="text-amber-600" />
+                        <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center">
+                            <UserCircle size={20} className="text-amber-600" />
                         </div>
                         <div>
-                            <div className="font-medium text-stone-900">مرحباً،</div>
-                            <div className="text-sm text-stone-500 truncate">{user.email}</div>
+                            <div className="text-sm font-medium text-stone-900">مرحباً،</div>
+                            <div className="text-xs text-stone-500 truncate">{user.email}</div>
                         </div>
                     </div>
                 </div>
@@ -265,12 +291,8 @@ export default function AdminLayout({
             </aside>
 
             {/* Main Content */}
-            <main className={`
-                transition-all duration-300
-                ${sidebarCollapsed ? 'md:mr-20' : 'md:mr-72'}
-                ${isMobileMenuOpen ? 'mr-0' : 'mr-0 md:mr-0'}
-            `}>
-                <div className="p-4 md:p-8 w-full">
+            <main className="flex-1 min-w-0 transition-all duration-300">
+                <div className="p-3 sm:p-4 md:p-6 lg:p-8 w-full">
                     {children}
                 </div>
             </main>
