@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import MarkdownViewer from "@/components/markdown-viewer";
@@ -14,7 +15,7 @@ import { db } from "@/lib/firebase";
 async function getPost(rawSlugOrId: string): Promise<Post | null> {
     // Decode the slug to handle Arabic characters correctly
     const slugOrId = decodeURIComponent(rawSlugOrId);
-    console.log(`[getPost] Fetching for: ${slugOrId} (Raw: ${rawSlugOrId})`);
+
 
     try {
         const postsRef = collection(db, "posts");
@@ -24,7 +25,7 @@ async function getPost(rawSlugOrId: string): Promise<Post | null> {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-            console.log(`[getPost] Found by slug: ${slugOrId}`);
+
             const doc = snapshot.docs[0];
             return {
                 id: doc.id,
@@ -34,19 +35,19 @@ async function getPost(rawSlugOrId: string): Promise<Post | null> {
 
         // 2. Fallback: Try finding by Document ID
         // Only try this if the string looks like a potential ID (alphanumeric check is optional but safer)
-        console.log(`[getPost] Slug not found, trying as ID: ${slugOrId}`);
+
         const docRef = doc(db, "posts", slugOrId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-            console.log(`[getPost] Found by ID: ${slugOrId}`);
+
             return {
                 id: docSnap.id,
                 ...docSnap.data()
             } as Post;
         }
 
-        console.log(`[getPost] Not found by Slug or ID: ${slugOrId}`);
+
         return null;
     } catch (error) {
         console.error("[getPost] Error fetching post:", error);
@@ -58,16 +59,16 @@ async function getPost(rawSlugOrId: string): Promise<Post | null> {
 async function getSuggestedPosts(currentPost: Post): Promise<Post[]> {
     try {
         const postsRef = collection(db, "posts");
-        
+
         // Try to find posts with similar tags first
         if (currentPost.tags && currentPost.tags.length > 0) {
-            const tagQueries = currentPost.tags.map(tag => 
-                query(postsRef, where("tags", "array-contains", tag), where("published", "==", true), limit(10))
+            const tagQueries = currentPost.tags.map(tag =>
+                query(postsRef, where("tags", "array-contains", tag), where("published", "==", true), limit(5))
             );
-            
+
             const snapshots = await Promise.all(tagQueries.map(q => getDocs(q)));
             const allPosts: Post[] = [];
-            
+
             snapshots.forEach(snapshot => {
                 snapshot.docs.forEach(doc => {
                     const post = { id: doc.id, ...doc.data() } as Post;
@@ -76,30 +77,30 @@ async function getSuggestedPosts(currentPost: Post): Promise<Post[]> {
                     }
                 });
             });
-            
+
             // Remove duplicates and limit to 4 posts
-            const uniquePosts = allPosts.filter((post, index, self) => 
+            const uniquePosts = allPosts.filter((post, index, self) =>
                 index === self.findIndex(p => p.id === post.id)
             );
-            
+
             if (uniquePosts.length >= 2) {
                 return uniquePosts.slice(0, 4);
             }
         }
-        
+
         // Fallback: Get posts from same category
         const categoryQuery = query(
-            postsRef, 
-            where("categoryId", "==", currentPost.categoryId), 
+            postsRef,
+            where("categoryId", "==", currentPost.categoryId),
             where("published", "==", true),
             limit(6)
         );
         const categorySnapshot = await getDocs(categoryQuery);
-        
+
         const categoryPosts = categorySnapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() } as Post))
             .filter(post => post.id !== currentPost.id);
-        
+
         return categoryPosts.slice(0, 4);
     } catch (error) {
         console.error("[getSuggestedPosts] Error:", error);
@@ -128,7 +129,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     // Get suggested posts
     const suggestedPosts = await getSuggestedPosts(post);
-    
+
     // Build the full URL for sharing
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://blog.abufiras.com';
     const fullUrl = `${baseUrl}/blog/${post.slug}`;
@@ -149,11 +150,14 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 {/* Cover Image Inside Post */}
                 {post.featuredImageUrl && (
-                    <div className="mb-8 rounded-lg overflow-hidden shadow-lg">
-                        <img
+                    <div className="relative mb-8 rounded-lg overflow-hidden shadow-lg h-96">
+                        <Image
                             src={post.featuredImageUrl}
                             alt={post.title}
-                            className="w-full h-auto max-h-96 object-cover"
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 768px"
+                            priority
                         />
                     </div>
                 )}

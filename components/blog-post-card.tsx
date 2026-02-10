@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import Image from "next/image";
 import { Post } from "@/types";
 import { Calendar, Clock, ArrowLeft } from 'lucide-react';
 
@@ -24,25 +24,27 @@ export default function BlogPostCard({ post, categoryName }: BlogPostCardProps) 
             {/* Image Section - Only render if image exists */}
             {imageSrc && (
                 <div className="relative h-48 sm:h-56 overflow-hidden">
-                    <Link 
-                        href={`/blog/${post.slug || post.id}`} 
+                    <Link
+                        href={`/blog/${post.slug || post.id}`}
                         className="block w-full h-full"
                         aria-label={`اقرأ مقال: ${post.title}`}
                     >
-                        <img
+                        <Image
                             src={imageSrc}
                             alt={post.title || 'صورة المقال'}
-                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                            fill
+                            className="object-cover transform group-hover:scale-105 transition-transform duration-500"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </Link>
-                    
+
                     {/* Status Badge */}
                     <div className="absolute top-3 left-3">
                         <span className={`
                             inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
-                            ${isPublished 
-                                ? 'bg-green-500 text-white' 
+                            ${isPublished
+                                ? 'bg-green-500 text-white'
                                 : 'bg-amber-500 text-white'
                             }
                         `}>
@@ -80,7 +82,7 @@ export default function BlogPostCard({ post, categoryName }: BlogPostCardProps) 
                             "مسودة"
                         )}
                     </div>
-                    
+
                     {categoryName && (
                         <Link
                             href={post.categoryId ? `/blog/category/${post.categoryId}` : '/blog'}
@@ -98,7 +100,7 @@ export default function BlogPostCard({ post, categoryName }: BlogPostCardProps) 
 
                 {/* Title */}
                 <h3 className="text-xl font-bold text-stone-900 mb-3 leading-tight">
-                    <Link 
+                    <Link
                         href={`/blog/${post.slug || post.id}`}
                         className="
                             hover:text-amber-700 transition-colors duration-200

@@ -48,6 +48,34 @@ export default function AdminLayout({
         return () => unsubscribe();
     }, [router]);
 
+    // Session Timeout — 30 minutes of inactivity
+    useEffect(() => {
+        if (!user) return;
+
+        const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+        let lastActivity = Date.now();
+
+        const updateActivity = () => {
+            lastActivity = Date.now();
+        };
+
+        const checkTimeout = setInterval(() => {
+            if (Date.now() - lastActivity >= TIMEOUT_MS) {
+                clearInterval(checkTimeout);
+                logout().then(() => router.push('/login'));
+            }
+        }, 60 * 1000); // Check every 60 seconds
+
+        window.addEventListener('click', updateActivity);
+        window.addEventListener('keydown', updateActivity);
+
+        return () => {
+            clearInterval(checkTimeout);
+            window.removeEventListener('click', updateActivity);
+            window.removeEventListener('keydown', updateActivity);
+        };
+    }, [user, router]);
+
     // Close mobile menu on route change
     useEffect(() => {
         setIsMobileMenuOpen(false);

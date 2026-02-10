@@ -5,8 +5,25 @@
  */
 export function isValidImageUrl(url: string): boolean {
     if (!url) return false;
-    // Simple regex for common image extensions or data URI
-    return /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(url) || /^data:image\//i.test(url) || /^https?:\/\/.*images.*/i.test(url);
+
+    // Allow data URIs for images
+    if (/^data:image\//i.test(url)) return true;
+
+    // Allow URLs with standard image extensions
+    if (/\.(jpg|jpeg|png|webp|gif|svg)(\?.*)?$/i.test(url)) return true;
+
+    // Allow trusted domains (Firebase Storage, Google Storage)
+    const trustedDomains = [
+        'firebasestorage.googleapis.com',
+        'storage.googleapis.com',
+        'waffyapp.com',
+    ];
+    try {
+        const hostname = new URL(url).hostname;
+        return trustedDomains.some(domain => hostname === domain || hostname.endsWith('.' + domain));
+    } catch {
+        return false;
+    }
 }
 
 /**

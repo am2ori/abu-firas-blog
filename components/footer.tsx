@@ -1,9 +1,17 @@
+import Image from "next/image";
+
 export default function Footer() {
     return (
         <footer className="border-t border-stone-200 py-8 mt-16 bg-white">
             <div className="container mx-auto px-4 text-center section-fade-in">
                 <div className="mb-6 flex justify-center">
-                    <img src="/BlogLofoAbufiras.png" alt="شعار المدونة" className="h-16 w-auto opacity-80 grayscale hover:grayscale-0 transition-all duration-500" />
+                    <Image
+                        src="/BlogLofoAbufiras.png"
+                        alt="شعار المدونة"
+                        width={120}
+                        height={64}
+                        className="h-16 w-auto opacity-80 grayscale hover:grayscale-0 transition-all duration-500"
+                    />
                 </div>
                 <p className="text-stone-500 text-sm mb-4">
                     جميع الحقوق محفوظة © {new Date().getFullYear()}، عبدالعظيم أبو فراس
@@ -22,3 +30,4 @@ export default function Footer() {
         </footer>
     );
 }
+
