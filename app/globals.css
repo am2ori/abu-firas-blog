@@ -1,18 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9; /* stone-50 */
-  --foreground: #1c1917; /* stone-900 */
-  --primary: #d97706; /* amber-600 */
-  --primary-dark: #b45309; /* amber-700 */
-  --border: #e2e8f0; /* slate-200 */
-  --border-subtle: #f1f5f9; /* slate-100 */
+  --background: #fafaf9;
+  /* stone-50 */
+  --foreground: #1c1917;
+  /* stone-900 */
+  --primary: #d97706;
+  /* amber-600 */
+  --primary-dark: #b45309;
+  /* amber-700 */
+  --border: #e2e8f0;
+  /* slate-200 */
+  --border-subtle: #f1f5f9;
+  /* slate-100 */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "IBM Plex Sans Arabic", sans-serif;
+  --font-sans: var(--font-sans), sans-serif;
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
 }
 
 body {
@@ -53,8 +61,10 @@ html {
 
 /* Enhanced text selection */
 ::selection {
-  background-color: #fef3c7; /* amber-100 */
-  color: #92400e; /* amber-800 */
+  background-color: #fef3c7;
+  /* amber-100 */
+  color: #92400e;
+  /* amber-800 */
 }
 
 /* Utility classes for enhanced interactions */
@@ -80,6 +90,7 @@ html {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -101,6 +112,7 @@ html {
   0% {
     background-position: 200% 0;
   }
+
   100% {
     background-position: -200% 0;
   }

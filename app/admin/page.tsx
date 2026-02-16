@@ -5,14 +5,14 @@ import Link from 'next/link';
 import { collection, getDocs, query, where, orderBy, limit, getCountFromServer } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Post } from '@/types';
-import { 
-    FileText, 
-    CheckCircle, 
-    FileClock, 
-    FolderOpen, 
-    ArrowRight, 
-    PenTool, 
-    Tag, 
+import {
+    FileText,
+    CheckCircle,
+    FileClock,
+    FolderOpen,
+    ArrowRight,
+    PenTool,
+    Tag,
     TrendingUp,
     Eye,
     Clock,
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <div className="text-stone-400">جاري تحميل الإحصائيات...</div>
                 </div>
             </div>
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
             icon: FileClock,
             color: 'amber',
             bgColor: 'bg-amber-50',
-            iconColor: 'text-amber-600',
+            iconColor: 'text-primary',
             borderColor: 'border-amber-200'
         },
         {
@@ -193,27 +193,45 @@ export default function AdminDashboard() {
                 <p className="text-stone-600">مرحباً بك في لوحة التحكم. إليك ملخص لأحدث نشاطاتك.</p>
             </div>
 
+            {/* Mobile Actions */}
+            <div className="md:hidden mb-6">
+                <Link
+                    href="/admin/posts/new"
+                    className="flex items-center justify-center gap-2 w-full py-3 bg-amber-600 text-white font-bold rounded-xl shadow-lg hover:bg-amber-700 transition-colors"
+                >
+                    <Plus size={20} />
+                    كتابة مقال جديد
+                </Link>
+            </div>
+
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {statCards.map((stat, index) => {
                     const Icon = stat.icon;
+                    // Map stats to links
+                    let linkHref = '/admin';
+                    if (stat.title.includes('المقالات') || stat.title.includes('منشورة') || stat.title.includes('مسودة')) linkHref = '/admin/posts';
+                    if (stat.title.includes('التصنيفات')) linkHref = '/admin/categories';
+                    if (stat.title.includes('الوسوم')) linkHref = '/admin/tags';
+
                     return (
-                        <div
+                        <Link
                             key={stat.title}
-                            className="
+                            href={linkHref}
+                            className={`
                                 bg-white p-4 sm:p-6 rounded-xl border border-stone-200 
                                 hover:shadow-card hover:border-stone-300 
-                                transition-all duration-300 group cursor-pointer
-                            "
+                                transition-all duration-300 group cursor-pointer block
+                            `}
                         >
                             <div className={`w-12 h-12 ${stat.bgColor} ${stat.iconColor} rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                                 <Icon size={24} />
                             </div>
-                            <div className="text-2xl font-bold text-stone-900 mb-1 group-hover:text-amber-600 transition-colors">
+                            <div className="text-2xl font-bold text-stone-900 mb-1 group-hover:text-primary transition-colors">
                                 {stat.value}
                             </div>
                             <div className="text-sm text-stone-500">{stat.title}</div>
-                        </div>
+                        </Link>
                     );
                 })}
             </div>
@@ -227,10 +245,10 @@ export default function AdminDashboard() {
                             <h2 className="text-2xl font-bold text-stone-900">آخر المقالات المحدثة</h2>
                             <p className="text-stone-500 text-sm mt-1">أحدث 6 مقالات تم تعديلها مؤخراً</p>
                         </div>
-                        <Link 
-                            href="/admin/posts" 
+                        <Link
+                            href="/admin/posts"
                             className="
-                                inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 
+                                inline-flex items-center gap-2 text-primary hover:text-primary-dark 
                                 font-medium transition-colors group
                             "
                         >
@@ -243,8 +261,8 @@ export default function AdminDashboard() {
                         {recentPosts.length > 0 ? (
                             <div className="divide-y divide-stone-100">
                                 {recentPosts.map((post, index) => (
-                                    <div 
-                                        key={post.id} 
+                                    <div
+                                        key={post.id}
                                         className="
                                             p-4 hover:bg-stone-50 transition-colors 
                                             group cursor-pointer animate-fade-in-up
@@ -255,13 +273,13 @@ export default function AdminDashboard() {
                                             <div className="flex items-center gap-3 flex-1 min-w-0">
                                                 <div className={`
                                                     w-3 h-3 rounded-full flex-shrink-0
-                                                    ${post.published 
-                                                        ? 'bg-green-500 shadow-green-200 shadow-sm' 
+                                                    ${post.published
+                                                        ? 'bg-green-500 shadow-green-200 shadow-sm'
                                                         : 'bg-amber-500 shadow-amber-200 shadow-sm'
                                                     }
                                                 `} />
                                                 <div className="flex-1 min-w-0">
-                                                    <h3 className="font-medium text-stone-900 truncate group-hover:text-amber-700 transition-colors">
+                                                    <h3 className="font-medium text-stone-900 truncate group-hover:text-primary-dark transition-colors">
                                                         {post.title}
                                                     </h3>
                                                     <div className="flex items-center gap-2 text-xs text-stone-500 mt-1">
@@ -286,7 +304,7 @@ export default function AdminDashboard() {
                                                 <Link
                                                     href={`/admin/posts/${post.id}/edit`}
                                                     className="
-                                                        p-2 text-stone-400 hover:text-amber-600 hover:bg-amber-50 
+                                                        p-2 text-stone-400 hover:text-primary hover:bg-primary/10 
                                                         rounded-lg transition-all duration-200
                                                         focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1
                                                     "
@@ -322,7 +340,7 @@ export default function AdminDashboard() {
                         <h2 className="text-2xl font-bold text-stone-900 mb-2">إجراءات سريعة</h2>
                         <p className="text-stone-500 text-sm">أدوات شائعة لتنفيذ المهام بسرعة</p>
                     </div>
-                    
+
                     <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                         <div className="p-6 space-y-3">
                             {quickActions.map((action) => {
@@ -335,9 +353,9 @@ export default function AdminDashboard() {
                                         className={`
                                             flex items-center justify-between gap-3 px-4 py-3 rounded-lg
                                             transition-all duration-200
-                                            ${action.primary 
-                                                ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm hover:shadow-md' 
-                                                : 'bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-amber-700 border border-stone-200'
+                                            ${action.primary
+                                                ? 'bg-amber-600 text-white hover:bg-amber-700 shadow-sm hover:shadow-md'
+                                                : 'bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-amber-800 border border-stone-200'
                                             }
                                             focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2
                                         `}
@@ -351,7 +369,7 @@ export default function AdminDashboard() {
                                 );
                             })}
                         </div>
-                        
+
                         {/* Stats Summary */}
                         <div className="border-t border-stone-100 p-6 bg-stone-50">
                             <div className="flex items-center gap-2 text-sm text-stone-600 mb-3">
@@ -371,7 +389,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                     <span className="text-stone-500">تحت المراجعة:</span>
-                                    <span className="font-medium text-amber-600">{stats.draftPosts}</span>
+                                    <span className="font-medium text-primary">{stats.draftPosts}</span>
                                 </div>
                             </div>
                         </div>

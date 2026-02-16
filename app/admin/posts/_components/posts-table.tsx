@@ -87,7 +87,7 @@ export default function PostsTable({
                         <th className="px-4 py-4 w-12 text-center">
                             <input
                                 type="checkbox"
-                                className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
                                 checked={allSelected}
                                 ref={input => {
                                     if (input) input.indeterminate = isIndeterminate;
@@ -109,7 +109,7 @@ export default function PostsTable({
                             <td className="px-4 py-4 text-center">
                                 <input
                                     type="checkbox"
-                                    className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    className="rounded border-gray-300 text-primary focus:ring-primary"
                                     checked={selectedPosts.includes(post.id)}
                                     onChange={() => onSelectPost(post.id)}
                                 />
@@ -117,7 +117,7 @@ export default function PostsTable({
                             <td className="px-6 py-4 text-stone-900 font-medium max-w-xs">
                                 <Link
                                     href={`/admin/posts/${post.id}/edit`}
-                                    className="hover:text-amber-700 transition-colors line-clamp-1"
+                                    className="hover:text-primary-dark transition-colors line-clamp-1"
                                 >
                                     {post.title}
                                 </Link>
@@ -157,7 +157,7 @@ export default function PostsTable({
                             </td>
                             <td className="px-6 py-4 text-sm">
                                 <div className="flex gap-3 items-center opacity-70 group-hover:opacity-100 transition-opacity">
-                                    <Link href={`/admin/posts/${post.id}/edit`} className="text-stone-600 hover:text-amber-700 font-medium transition-colors">
+                                    <Link href={`/admin/posts/${post.id}/edit`} className="text-stone-600 hover:text-primary-dark font-medium transition-colors">
                                         تعديل
                                     </Link>
                                     <div className="h-4 w-px bg-stone-200" />
@@ -191,7 +191,7 @@ export default function PostsTable({
                         <div className="flex justify-between items-start gap-3">
                             <Link
                                 href={`/admin/posts/${post.id}/edit`}
-                                className="font-bold text-stone-900 line-clamp-2 hover:text-amber-700 transition-colors flex-1"
+                                className="font-bold text-stone-900 line-clamp-2 hover:text-primary-dark transition-colors flex-1"
                             >
                                 {post.title}
                             </Link>

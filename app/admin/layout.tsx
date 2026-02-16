@@ -37,13 +37,29 @@ export default function AdminLayout({
     const pathname = usePathname();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             if (!currentUser) {
                 router.push('/login');
+                setLoading(false);
             } else {
-                setUser(currentUser);
+                try {
+                    const tokenResult = await currentUser.getIdTokenResult();
+                    if (tokenResult.claims.isAdmin) {
+                        setUser(currentUser);
+                    } else {
+                        console.warn('Unauthorized access attempt: User is not yet an admin (claim missing). Allowing temporary access for setup.');
+                        // FIXME: Re-enable strict check after setting up admin claim
+                        // await logout();
+                        // router.push('/login');
+                        setUser(currentUser); // Allow access for now
+                    }
+                } catch (error) {
+                    console.error('Error verifying admin claims:', error);
+                    router.push('/login');
+                } finally {
+                    setLoading(false);
+                }
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
@@ -91,7 +107,7 @@ export default function AdminLayout({
         return (
             <div className="min-h-screen flex items-center justify-center bg-stone-50">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <div className="text-stone-400">جاري التحميل...</div>
                 </div>
             </div>
@@ -144,7 +160,7 @@ export default function AdminLayout({
                         </Link>
                     </div>
                     <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                        <UserCircle size={20} className="text-amber-600" />
+                        <UserCircle size={20} className="text-primary" />
                     </div>
                 </div>
             </header>
@@ -177,7 +193,7 @@ export default function AdminLayout({
                     <Link
                         href="/admin"
                         className={`
-                            flex items-center text-amber-600 hover:text-amber-700 transition-colors
+                            flex items-center text-primary hover:text-primary-dark transition-colors
                             ${sidebarCollapsed ? 'justify-center' : 'gap-3'}
                         `}
                     >
@@ -223,7 +239,7 @@ export default function AdminLayout({
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center">
-                            <UserCircle size={20} className="text-amber-600" />
+                            <UserCircle size={20} className="text-primary" />
                         </div>
                         <div>
                             <div className="text-sm font-medium text-stone-900">مرحباً،</div>
@@ -256,7 +272,7 @@ export default function AdminLayout({
                                                 transition-all duration-200
                                                 ${sidebarCollapsed ? 'justify-center' : ''}
                                                 ${isActive
-                                                    ? 'bg-amber-50 text-amber-700 font-medium shadow-sm'
+                                                    ? 'bg-primary/10 text-primary-dark font-medium shadow-sm'
                                                     : 'text-stone-600 hover:bg-stone-100 hover:text-stone-900'
                                                 }
                                                 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-1

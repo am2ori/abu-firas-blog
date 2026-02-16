@@ -122,7 +122,7 @@ export default function CategoriesPage() {
                             <th className="px-4 py-4 w-12 text-center">
                                 <input
                                     type="checkbox"
-                                    className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    className="rounded border-gray-300 text-primary focus:ring-primary"
                                     checked={allSelected}
                                     ref={input => {
                                         if (input) input.indeterminate = isIndeterminate;
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
                                 <td className="px-4 py-4 text-center">
                                     <input
                                         type="checkbox"
-                                        className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                        className="rounded border-gray-300 text-primary focus:ring-primary"
                                         checked={selectedCategories.includes(cat.id)}
                                         onChange={() => handleSelectCategory(cat.id)}
                                     />
@@ -162,7 +162,7 @@ export default function CategoriesPage() {
                                 </td>
                                 <td className="px-6 py-4 text-sm">
                                     <div className="flex gap-4">
-                                        <Link href={`/admin/categories/${cat.id}/edit`} className="text-amber-700 hover:text-amber-900 font-medium">
+                                        <Link href={`/admin/categories/${cat.id}/edit`} className="text-primary-dark hover:text-stone-900 font-medium">
                                             تعديل
                                         </Link>
                                         <button
@@ -187,7 +187,7 @@ export default function CategoriesPage() {
                             <div className="flex items-start gap-3">
                                 <input
                                     type="checkbox"
-                                    className="mt-1 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                    className="mt-1 rounded border-gray-300 text-primary focus:ring-primary"
                                     checked={selectedCategories.includes(cat.id)}
                                     onChange={() => handleSelectCategory(cat.id)}
                                 />

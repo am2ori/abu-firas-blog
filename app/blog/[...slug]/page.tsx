@@ -116,11 +116,48 @@ async function getSuggestedPosts(currentPost: Post): Promise<Post[]> {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }) {
     const { slug } = await params;
     const post = await getPost(slug);
-    if (!post) return {};
+
+    if (!post) {
+        return {
+            title: 'المقال غير موجود',
+            description: 'لم يتم العثور على المقال المطلوب'
+        };
+    }
+
+    const ogImage = post.featuredImageUrl || '/BlogLofoAbufiras.png';
+    const isoDate = post.publishedAt
+        ? new Date(post.publishedAt.seconds * 1000).toISOString()
+        : new Date().toISOString();
 
     return {
         title: post.seo_title || post.title,
-        description: post.seo_description,
+        description: post.seo_description || post.contentMarkdown.substring(0, 160),
+        openGraph: {
+            title: post.seo_title || post.title,
+            description: post.seo_description || post.contentMarkdown.substring(0, 160),
+            type: 'article',
+            publishedTime: isoDate,
+            modifiedTime: post.updatedAt ? new Date(post.updatedAt.seconds * 1000).toISOString() : isoDate,
+            authors: ['عبدالعظيم أبو فراس'],
+            tags: post.tags,
+            images: [
+                {
+                    url: ogImage,
+                    width: 1200,
+                    height: 630,
+                    alt: post.title,
+                }
+            ],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: post.seo_title || post.title,
+            description: post.seo_description || post.contentMarkdown.substring(0, 160),
+            images: [ogImage],
+        },
+        alternates: {
+            canonical: `/blog/${post.slug}`,
+        }
     };
 }
 

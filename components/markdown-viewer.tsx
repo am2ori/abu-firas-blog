@@ -16,7 +16,7 @@ export default function MarkdownViewer({ content }: MarkdownViewerProps) {
                     p: ({ ...props }) => <p className="mb-4 leading-relaxed text-stone-700 text-justify" {...props} />,
                     ul: ({ ...props }) => <ul className="list-disc list-inside mb-4 pr-4" {...props} />,
                     ol: ({ ...props }) => <ol className="list-decimal list-inside mb-4 pr-4" {...props} />,
-                    a: ({ ...props }) => <a className="text-amber-700 hover:underline" {...props} />,
+                    a: ({ ...props }) => <a className="text-primary-dark hover:underline" {...props} />,
                     blockquote: ({ ...props }) => (
                         <blockquote className="border-r-4 border-amber-500 pr-4 italic bg-stone-50 py-2 my-6 text-stone-600" {...props} />
                     ),

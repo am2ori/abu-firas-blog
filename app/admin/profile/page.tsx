@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { getHomeSettings, updateHomeSettings, HomeSettings } from '@/lib/settings';
-import { 
-    User, 
-    Save, 
-    Eye, 
-    Globe, 
-    Twitter, 
-    Facebook, 
-    Linkedin, 
+import {
+    User,
+    Save,
+    Eye,
+    Globe,
+    Twitter,
+    Facebook,
+    Linkedin,
     Github,
     Camera,
     CheckCircle,
@@ -114,7 +114,7 @@ export default function ProfilePage() {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <div className="text-stone-400">جاري تحميل الإعدادات...</div>
                 </div>
             </div>
@@ -146,11 +146,10 @@ export default function ProfilePage() {
 
             {/* Message */}
             {message && (
-                <div className={`p-4 rounded-lg border flex items-center gap-3 ${
-                    message.type === 'success' 
-                        ? 'bg-green-50 text-green-800 border-green-200' 
+                <div className={`p-4 rounded-lg border flex items-center gap-3 ${message.type === 'success'
+                        ? 'bg-green-50 text-green-800 border-green-200'
                         : 'bg-red-50 text-red-800 border-red-200'
-                }`}>
+                    }`}>
                     {message.type === 'success' ? (
                         <CheckCircle size={20} />
                     ) : (
@@ -164,7 +163,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100">
                     <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                        <User size={20} className="text-amber-600" />
+                        <User size={20} className="text-primary" />
                         معلومات الكاتب
                     </h2>
                 </div>
@@ -232,7 +231,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100">
                     <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                        <Eye size={20} className="text-amber-600" />
+                        <Eye size={20} className="text-primary" />
                         عرض الصفحة الرئيسية
                     </h2>
                 </div>
@@ -256,14 +255,12 @@ export default function ProfilePage() {
                             </div>
                             <button
                                 onClick={() => updateVisibility(item.key, !settings.homeVisibility[item.key])}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                                    settings.homeVisibility[item.key] ? 'bg-amber-600' : 'bg-stone-300'
-                                }`}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.homeVisibility[item.key] ? 'bg-primary' : 'bg-stone-300'
+                                    }`}
                             >
                                 <span
-                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                        settings.homeVisibility[item.key] ? 'translate-x-6' : 'translate-x-1'
-                                    }`}
+                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.homeVisibility[item.key] ? 'translate-x-6' : 'translate-x-1'
+                                        }`}
                                 />
                             </button>
                         </div>
@@ -275,7 +272,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100">
                     <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                        <Globe size={20} className="text-amber-600" />
+                        <Globe size={20} className="text-primary" />
                         محتوى البانر الرئيسي
                     </h2>
                 </div>
@@ -345,7 +342,7 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                 <div className="p-6 border-b border-stone-100">
                     <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                        <Twitter size={20} className="text-amber-600" />
+                        <Twitter size={20} className="text-primary" />
                         روابط التواصل الاجتماعي
                     </h2>
                 </div>
@@ -385,7 +382,7 @@ export default function ProfilePage() {
                 <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary-dark disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
                 >
                     {saving ? (
                         <>

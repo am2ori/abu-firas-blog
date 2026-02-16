@@ -99,11 +99,11 @@ export default function BlogPostCard({ post, categoryName }: BlogPostCardProps) 
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl font-bold text-stone-900 mb-3 leading-tight">
+                <h3 className="text-xl font-bold mb-3 leading-tight" style={{ color: 'var(--card-title-color)' }}>
                     <Link
                         href={`/blog/${post.slug || post.id}`}
                         className="
-                            hover:text-amber-700 transition-colors duration-200
+                            hover:text-primary-dark transition-colors duration-200
                             focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 rounded
                         "
                     >
@@ -146,7 +146,7 @@ export default function BlogPostCard({ post, categoryName }: BlogPostCardProps) 
                     <Link
                         href={`/blog/${post.slug || post.id}`}
                         className="
-                            inline-flex items-center gap-2 text-amber-600 hover:text-amber-700 
+                            inline-flex items-center gap-2 text-stone-900 hover:text-primary 
                             font-medium text-sm transition-colors duration-200
                             focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 rounded
                         "

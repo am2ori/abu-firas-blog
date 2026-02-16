@@ -153,7 +153,7 @@ export default function TagsPage() {
                                     <th className="px-4 py-4 w-12 text-center">
                                         <input
                                             type="checkbox"
-                                            className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                            className="rounded border-gray-300 text-primary focus:ring-primary"
                                             checked={allSelected}
                                             ref={input => {
                                                 if (input) input.indeterminate = isIndeterminate;
@@ -172,7 +172,7 @@ export default function TagsPage() {
                                         <td className="px-4 py-4 text-center">
                                             <input
                                                 type="checkbox"
-                                                className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                                                className="rounded border-gray-300 text-primary focus:ring-primary"
                                                 checked={selectedTags.includes(tag.id)}
                                                 onChange={() => handleSelectTag(tag.id)}
                                             />
@@ -192,7 +192,7 @@ export default function TagsPage() {
                                             <div className="flex items-center justify-center gap-2">
                                                 <Link
                                                     href={`/admin/tags/${tag.id}/edit`}
-                                                    className="text-amber-700 hover:text-amber-800 font-medium text-sm"
+                                                    className="text-primary-dark hover:text-stone-900 font-medium text-sm"
                                                 >
                                                     تعديل
                                                 </Link>

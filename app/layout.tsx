@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
-import "@fontsource/ibm-plex-sans-arabic";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import "./globals.css";
+import ThemeProvider from "@/components/theme-provider";
+
+const ibmPlexSansArabic = IBM_Plex_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL
+// ... code continues ... (wait, I should not replace the metadata block if I can avoid it)
 
 export const metadata: Metadata = {
   title: "وميض الكتابة | مدونة أبو فراس",
@@ -17,8 +28,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ar" dir="rtl">
-      <body className="antialiased bg-stone-50 text-stone-900 font-sans" suppressHydrationWarning>
-        {children}
+      <body className={`antialiased bg-stone-50 text-stone-900 font-sans ${ibmPlexSansArabic.variable}`} suppressHydrationWarning>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

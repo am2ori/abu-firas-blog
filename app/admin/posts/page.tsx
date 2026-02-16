@@ -232,7 +232,7 @@ export default function AdminPostsPage() {
                 <h1 className="text-3xl font-bold text-stone-800">المقالات</h1>
                 <Link
                     href="/admin/posts/new"
-                    className="bg-amber-900 hover:bg-amber-800 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2"
+                    className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center gap-2"
                 >
                     <Plus size={18} />
                     كتابة مقال جديد

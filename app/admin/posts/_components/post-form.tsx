@@ -95,10 +95,10 @@ export default function PostForm({ post }: PostFormProps) {
             // Refresh categories list
             const updatedCategories = await getCategories();
             setCategories(updatedCategories);
-            
+
             // Select the newly added category
             setCategory(categoryId);
-            
+
             // Reset form
             setNewCategoryName('');
             setNewCategorySlug('');
@@ -299,7 +299,7 @@ export default function PostForm({ post }: PostFormProps) {
                             type="checkbox"
                             checked={published}
                             onChange={handlePublishedChange}
-                            className="w-4 h-4 text-amber-600 rounded focus:ring-amber-500"
+                            className="w-4 h-4 text-primary rounded focus:ring-primary"
                         />
                         <span className={`font-medium ${published ? 'text-green-600' : 'text-stone-500'}`}>
                             {published ? 'منشور' : 'مسودة'}
@@ -344,7 +344,11 @@ export default function PostForm({ post }: PostFormProps) {
                             className={`w-full px-4 py-2 rounded-lg border focus:ring-amber-500 focus:border-amber-500 outline-none bg-stone-50 text-stone-600 ltr text-right ${slugError ? 'border-red-500' : 'border-stone-200'}`}
                             dir="ltr"
                         />
-                        {slugError && <p className="text-red-500 text-xs mt-1">{slugError}</p>}
+                        {slugError ? (
+                            <p className="text-red-500 text-xs mt-1">{slugError}</p>
+                        ) : (
+                            !isSlugModified && <p className="text-xs text-stone-400 mt-1 italic">✨ يتم إنشاء الرابط تلقائياً من عنوان المقال</p>
+                        )}
                     </div>
 
                     <div>
@@ -442,7 +446,7 @@ export default function PostForm({ post }: PostFormProps) {
                                     dir="ltr"
                                 />
                                 {published && !publishedAt && (
-                                    <p className="text-xs text-amber-600 mt-1">سيتم تعيينه تلقائياً عند الحفظ</p>
+                                    <p className="text-xs text-primary mt-1">سيتم تعيينه تلقائياً عند الحفظ</p>
                                 )}
                                 {!published && (
                                     <p className="text-xs text-stone-400 mt-1">تاريخ النشر محفوظ كمسودة</p>
@@ -480,7 +484,7 @@ export default function PostForm({ post }: PostFormProps) {
                                                 {cat.name}
                                             </option>
                                         ))}
-                                        <option value="new" className="text-amber-700 font-medium">
+                                        <option value="new" className="text-primary-dark font-medium">
                                             + إضافة تصنيف جديد
                                         </option>
                                     </select>
@@ -495,7 +499,7 @@ export default function PostForm({ post }: PostFormProps) {
                             {showNewCategoryForm && (
                                 <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg space-y-3">
                                     <h4 className="text-sm font-medium text-amber-900">إضافة تصنيف جديد</h4>
-                                    
+
                                     <div>
                                         <label className="block text-xs font-medium text-stone-700 mb-1">اسم التصنيف</label>
                                         <input
@@ -523,7 +527,7 @@ export default function PostForm({ post }: PostFormProps) {
                                             type="button"
                                             onClick={handleAddNewCategory}
                                             disabled={isAddingCategory || !newCategoryName.trim()}
-                                            className="px-3 py-1.5 bg-amber-700 text-white rounded text-sm hover:bg-amber-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="px-3 py-1.5 bg-primary-dark text-white rounded text-sm hover:bg-primary-dark/90 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {isAddingCategory ? 'جاري الإضافة...' : 'إضافة التصنيف'}
                                         </button>
@@ -545,7 +549,7 @@ export default function PostForm({ post }: PostFormProps) {
 
                         <div>
                             <label className="block text-sm font-medium text-stone-700 mb-2">الوسوم</label>
-                            <TagInput 
+                            <TagInput
                                 selectedTags={tags}
                                 onTagsChange={handleTagsChange}
                                 placeholder="أضف وسماً..."
@@ -629,7 +633,7 @@ export default function PostForm({ post }: PostFormProps) {
                                         type="file"
                                         accept=".jpg,.jpeg,.png,.webp"
                                         onChange={handleFileSelect}
-                                        className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                                        className="w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/5 file:text-primary-dark hover:file:bg-primary/10"
                                     />
                                     {fileError && (
                                         <p className="text-red-500 text-xs mt-1">{fileError}</p>
@@ -638,7 +642,7 @@ export default function PostForm({ post }: PostFormProps) {
                                         الحجم الأقصى: 5MB. الصيغ المدعومة: JPG, PNG, WebP
                                     </p>
                                     {selectedFile && (
-                                        <p className="text-xs text-amber-600 mt-2 font-medium">
+                                        <p className="text-xs text-primary mt-2 font-medium">
                                             ⚠️ ملاحظة: سيتم رفع الصورة عند توفير خدمة التخزين السحابي لاحقاً.
                                         </p>
                                     )}

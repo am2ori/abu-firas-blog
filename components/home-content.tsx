@@ -1,94 +1,28 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import Link from 'next/link';
-import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { Post, Category } from '@/types';
-import { getHomeSettings, HomeSettings } from '@/lib/settings';
+import { HomeSettings } from '@/lib/settings';
 import BlogPostCard from "@/components/blog-post-card";
-import { FolderOpen } from 'lucide-react';
+import { FolderOpen, Search } from 'lucide-react';
 import SearchBar from "@/components/search-bar";
 import TagsWidget from "@/components/tags-widget";
 
-export default function HomeContent() {
-    const [latestPosts, setLatestPosts] = useState<Post[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [allTags, setAllTags] = useState<string[]>([]);
-    const [homeSettings, setHomeSettings] = useState<HomeSettings | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+interface HomeContentProps {
+    latestPosts: Post[];
+    categories: Category[];
+    allTags: string[];
+    homeSettings: HomeSettings | null;
+}
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                // 0. Fetch Home Settings
-                const settings = await getHomeSettings();
-                setHomeSettings(settings);
-
-                // 1. Fetch Categories
-                const catsRef = collection(db, 'categories');
-                const catsSnapshot = await getDocs(catsRef);
-                const catsResult = catsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Category[];
-                setCategories(catsResult);
-
-                // 2. Fetch Latest 12 Published Posts (Global)
-                const postsRef = collection(db, 'posts');
-                const postsQuery = query(
-                    postsRef,
-                    where('published', '==', true),
-                    orderBy('publishedAt', 'desc'),
-                    limit(12)
-                );
-                const postsSnapshot = await getDocs(postsQuery);
-                const posts = postsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                })) as Post[];
-                setLatestPosts(posts);
-
-                // 3. Extract Tags (Client-side simple extraction from fetched posts)
-                const tags = new Set<string>();
-                posts.forEach(p => p.tags?.forEach(t => tags.add(t)));
-                setAllTags(Array.from(tags));
-
-            } catch (error: unknown) {
-                console.error("Error fetching home data:", error);
-                const errorMessage = error instanceof Error ? error.message : 'خطأ غير معروف';
-                setError(`حدث خطأ أثناء تحميل البيانات: ${errorMessage}`);
-                if (errorMessage.includes('index')) {
-                    setError('⚠️ يحتاج هذا القسم إلى "فهرس" (Index) في Firebase ليعمل. افتح الكونسول (F12) واضغط على الرابط لإنشائه.');
-                }
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        fetchData();
-    }, []);
-
-    if (error) {
-        return (
-            <div className="container mx-auto px-4 py-12 flex items-center justify-center">
-                <div className="bg-red-50 text-red-800 p-8 rounded-xl border border-red-200 text-center max-w-lg">
-                    <h2 className="text-xl font-bold mb-4">عذراً، حدث خطأ 😔</h2>
-                    <p className="mb-4">{error}</p>
-                    <button
-                        onClick={() => window.location.reload()}
-                        className="bg-red-100 hover:bg-red-200 text-red-800 px-4 py-2 rounded-lg transition-colors"
-                    >
-                        إعادة المحاولة
-                    </button>
-                    <div className="mt-6 text-xs text-red-600/70 text-left ltr bg-white/50 p-2 rounded">
-                        Developer Note: Check console for full error details.
-                    </div>
-                </div>
-            </div>
-        );
-    }
+export default function HomeContent({
+    latestPosts,
+    categories,
+    allTags,
+    homeSettings
+}: HomeContentProps) {
+    const loading = false; // Data is now pre-fetched on server
 
     return (
         <>
@@ -110,7 +44,7 @@ export default function HomeContent() {
                                 </span>
                                 <h1
                                     className="text-4xl md:text-6xl font-bold text-stone-900 mb-6 leading-tight"
-                                    dangerouslySetInnerHTML={{ __html: homeSettings?.heroContent?.heroTitle || 'أنا <span class="text-amber-600">عبدالعظيم أبو فراس</span>' }}
+                                    dangerouslySetInnerHTML={{ __html: homeSettings?.heroContent?.heroTitle || 'أنا <span class="text-primary">عبدالعظيم أبو فراس</span>' }}
                                 />
                                 <div className="text-xl md:text-2xl text-stone-700 leading-relaxed mb-8 max-w-3xl mx-auto">
                                     <blockquote
@@ -122,12 +56,10 @@ export default function HomeContent() {
                                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                                         <Link
                                             href={homeSettings.heroContent.ctaButton.url || '/blog'}
-                                            className="inline-flex items-center gap-2 px-8 py-3 bg-amber-600 text-white font-medium rounded-full hover:bg-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-amber-200"
+                                            className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--button-bg)] text-[var(--button-text)] font-medium rounded-full hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary/20"
+                                            style={{ backgroundColor: 'var(--button-bg)', color: 'var(--button-text)' }}
                                         >
-                                            {homeSettings.heroContent.ctaButton.text}
-                                            <svg className="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                            </svg>
+                                            تصفح المقالات
                                         </Link>
                                     </div>
                                 )}
@@ -145,11 +77,7 @@ export default function HomeContent() {
                         {/* Search Widget */}
                         <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-subtle">
                             <h3 className="font-bold text-stone-900 mb-4 flex items-center gap-2">
-                                <div className="w-6 h-6 bg-amber-100 rounded-lg flex items-center justify-center">
-                                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
+                                <Search size={18} className="text-amber-600" />
                                 بحث في المقالات
                             </h3>
                             <Suspense fallback={<div className="h-10 bg-stone-100 rounded-lg skeleton" />}>
@@ -175,7 +103,7 @@ export default function HomeContent() {
                                         <li key={cat.id}>
                                             <Link
                                                 href={`/blog/category/${cat.id}`}
-                                                className="flex items-center justify-between text-stone-600 hover:text-amber-700 hover:bg-amber-50 px-3 py-2 rounded-lg transition-all duration-200 text-sm group"
+                                                className="flex items-center justify-between text-stone-600 hover:text-primary-dark hover:bg-primary/5 px-3 py-2 rounded-lg transition-all duration-200 text-sm group"
                                             >
                                                 <span className="font-medium">{cat.name}</span>
                                                 <svg className="w-4 h-4 text-stone-400 group-hover:text-amber-600 transition-colors transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,7 +126,6 @@ export default function HomeContent() {
                             <div className="flex items-center justify-between mb-8">
                                 <div>
                                     <h2 className="text-3xl font-bold text-stone-900 mb-2">أحدث المقالات</h2>
-                                    <p className="text-stone-600">آخر ما نشرته في رحلة المعرفة</p>
                                 </div>
                             </div>
                         )}
@@ -247,12 +174,10 @@ export default function HomeContent() {
                             <div className="mt-12 text-center">
                                 <Link
                                     href="/blog"
-                                    className="inline-flex items-center gap-2 px-8 py-3 bg-amber-600 text-white font-medium rounded-full hover:bg-amber-700 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-amber-200"
+                                    className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--button-bg)] text-[var(--button-text)] font-medium rounded-full hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-primary/20"
+                                    style={{ backgroundColor: 'var(--button-bg)', color: 'var(--button-text)' }}
                                 >
                                     تصفح جميع المقالات
-                                    <svg className="w-4 h-4 transform rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
                                 </Link>
                             </div>
                         )}

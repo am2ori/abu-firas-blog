@@ -42,7 +42,7 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "أ
             return;
         }
 
-        const filtered = availableTags.filter(tag => 
+        const filtered = availableTags.filter(tag =>
             tag.name.toLowerCase().includes(currentTag.toLowerCase()) &&
             !selectedTags.includes(tag.name)
         );
@@ -86,15 +86,15 @@ export default function TagInput({ selectedTags, onTagsChange, placeholder = "أ
         <div className="relative">
             <div className="flex flex-wrap gap-2 mb-3">
                 {selectedTags.map(tag => (
-                    <span 
-                        key={tag} 
+                    <span
+                        key={tag}
                         className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 rounded-full text-sm border border-amber-100"
                     >
                         {tag}
                         <button
                             type="button"
                             onClick={() => handleRemoveTag(tag)}
-                            className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-amber-200 text-amber-700 leading-none pb-0.5"
+                            className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-primary/20 text-primary-dark leading-none pb-0.5"
                             title="حذف الوسم"
                         >
                             ×

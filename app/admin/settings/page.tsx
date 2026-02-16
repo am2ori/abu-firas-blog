@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { getAppearanceSettings, getAccountSettings, getSystemSettings, updateAppearanceSettings, updateAccountSettings, updateSystemSettings, AppearanceSettings, AccountSettings, SystemSettings } from '@/lib/settings';
 import { auth } from '@/lib/firebase';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { 
-    Palette, 
-    User, 
-    Mail, 
-    Settings as SettingsIcon, 
-    Save, 
-    Eye, 
+import {
+    Palette,
+    User,
+    Mail,
+    Settings as SettingsIcon,
+    Save,
+    Eye,
     EyeOff,
     CheckCircle,
     AlertCircle,
@@ -82,7 +82,10 @@ export default function SettingsPage() {
                     if (appearanceSettings) {
                         success = await updateAppearanceSettings({
                             primaryColor: appearanceSettings.primaryColor,
-                            secondaryColor: appearanceSettings.secondaryColor,
+                            secondaryColor: appearanceSettings.secondaryColor || '#78716c',
+                            buttonColor: appearanceSettings.buttonColor || appearanceSettings.primaryColor,
+                            buttonTextColor: appearanceSettings.buttonTextColor || '#ffffff',
+                            cardTitleColor: appearanceSettings.cardTitleColor || appearanceSettings.primaryColor,
                             postsPerPage: appearanceSettings.postsPerPage
                         });
                     }
@@ -176,7 +179,7 @@ export default function SettingsPage() {
         return (
             <div className="flex items-center justify-center h-64">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-600 mx-auto mb-4"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <div className="text-stone-400">جاري تحميل الإعدادات...</div>
                 </div>
             </div>
@@ -203,7 +206,7 @@ export default function SettingsPage() {
                                 className={`
                                     flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors
                                     ${activeTab === tab.id
-                                        ? 'border-amber-600 text-amber-600'
+                                        ? 'border-primary text-primary'
                                         : 'border-transparent text-stone-500 hover:text-stone-700 hover:border-stone-300'
                                     }
                                 `}
@@ -218,11 +221,10 @@ export default function SettingsPage() {
 
             {/* Message */}
             {message && (
-                <div className={`p-4 rounded-lg border flex items-center gap-3 ${
-                    message.type === 'success' 
-                        ? 'bg-green-50 text-green-800 border-green-200' 
-                        : 'bg-red-50 text-red-800 border-red-200'
-                }`}>
+                <div className={`p-4 rounded-lg border flex items-center gap-3 ${message.type === 'success'
+                    ? 'bg-green-50 text-green-800 border-green-200'
+                    : 'bg-red-50 text-red-800 border-red-200'
+                    }`}>
                     {message.type === 'success' ? (
                         <CheckCircle size={20} />
                     ) : (
@@ -239,7 +241,7 @@ export default function SettingsPage() {
                     <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                         <div className="p-6 border-b border-stone-100">
                             <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                                <Palette size={20} className="text-amber-600" />
+                                <Palette size={20} className="text-primary" />
                                 إعدادات المظهر
                             </h2>
                         </div>
@@ -270,6 +272,47 @@ export default function SettingsPage() {
                                         />
                                     </div>
                                 </div>
+
+                                {/* Live Preview Section */}
+                                <div className="mt-6 md:col-span-2 border-t border-stone-100 pt-6">
+                                    <h3 className="text-sm font-medium text-stone-700 mb-4">معاينة الألوان</h3>
+                                    <div className="flex flex-wrap gap-4">
+                                        {/* Primary Button Preview */}
+                                        <button
+                                            className="px-6 py-2 rounded-lg text-white font-medium shadow-sm transition-opacity hover:opacity-90"
+                                            style={{ backgroundColor: appearanceSettings.buttonColor || appearanceSettings.primaryColor, color: appearanceSettings.buttonTextColor || '#ffffff' }}
+                                        >
+                                            زر أساسي
+                                        </button>
+
+                                        {/* Secondary/Outline Button Preview */}
+                                        <button
+                                            className="px-6 py-2 rounded-lg bg-transparent border-2 font-medium"
+                                            style={{
+                                                borderColor: appearanceSettings.primaryColor,
+                                                color: appearanceSettings.primaryColor
+                                            }}
+                                        >
+                                            زر ثانوي
+                                        </button>
+
+                                        {/* Link Preview */}
+                                        <div className="flex items-center px-4 bg-stone-50 rounded-lg">
+                                            <span style={{ color: appearanceSettings.primaryColor }} className="underline cursor-pointer">
+                                                رابط نصي
+                                            </span>
+                                        </div>
+
+                                        {/* Icon/Badge Preview */}
+                                        <div
+                                            className="w-10 h-10 rounded-full flex items-center justify-center text-white"
+                                            style={{ backgroundColor: appearanceSettings.primaryColor }}
+                                        >
+                                            <Palette size={20} />
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label className="block text-sm font-medium text-stone-700 mb-2">
                                         اللون الثانوي (اختياري)
@@ -292,6 +335,84 @@ export default function SettingsPage() {
                                                 secondaryColor: e.target.value
                                             })}
                                             className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                                        لون الأزرار
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="color"
+                                            value={appearanceSettings.buttonColor || appearanceSettings.primaryColor}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                buttonColor: e.target.value
+                                            })}
+                                            className="h-10 w-20 border border-stone-300 rounded cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={appearanceSettings.buttonColor || ''}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                buttonColor: e.target.value
+                                            })}
+                                            className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            placeholder={appearanceSettings.primaryColor}
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                                        لون نص الأزرار
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="color"
+                                            value={appearanceSettings.buttonTextColor || '#ffffff'}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                buttonTextColor: e.target.value
+                                            })}
+                                            className="h-10 w-20 border border-stone-300 rounded cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={appearanceSettings.buttonTextColor || ''}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                buttonTextColor: e.target.value
+                                            })}
+                                            className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            placeholder="#ffffff"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                                        لون عناوين المقالات في الكاردات
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="color"
+                                            value={appearanceSettings.cardTitleColor || appearanceSettings.primaryColor}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                cardTitleColor: e.target.value
+                                            })}
+                                            className="h-10 w-20 border border-stone-300 rounded cursor-pointer"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={appearanceSettings.cardTitleColor || ''}
+                                            onChange={(e) => setAppearanceSettings({
+                                                ...appearanceSettings,
+                                                cardTitleColor: e.target.value
+                                            })}
+                                            className="flex-1 px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            placeholder={appearanceSettings.primaryColor}
                                         />
                                     </div>
                                 </div>
@@ -333,51 +454,207 @@ export default function SettingsPage() {
                             </div>
                         </div>
                     </div>
-                )}
+                )
+                }
 
                 {/* Account Tab */}
-                {activeTab === 'account' && accountSettings && (
-                    <div className="space-y-8">
-                        {/* Account Info */}
+                {
+                    activeTab === 'account' && accountSettings && (
+                        <div className="space-y-8">
+                            {/* Account Info */}
+                            <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                                <div className="p-6 border-b border-stone-100">
+                                    <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
+                                        <User size={20} className="text-primary" />
+                                        معلومات الحساب
+                                    </h2>
+                                </div>
+                                <div className="p-6 space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                                            الاسم
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={accountSettings.name}
+                                            onChange={(e) => setAccountSettings({
+                                                ...accountSettings,
+                                                name: e.target.value
+                                            })}
+                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                                            البريد الإلكتروني
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={accountSettings.email}
+                                            onChange={(e) => setAccountSettings({
+                                                ...accountSettings,
+                                                email: e.target.value
+                                            })}
+                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={() => handleSave('account')}
+                                            disabled={saving}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {saving ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                    جاري الحفظ...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save size={16} />
+                                                    حفظ المعلومات
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Password Change */}
+                            <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
+                                <div className="p-6 border-b border-stone-100">
+                                    <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
+                                        <Lock size={20} className="text-primary" />
+                                        تغيير كلمة المرور
+                                    </h2>
+                                </div>
+                                <div className="p-6 space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                                            كلمة المرور الحالية
+                                        </label>
+                                        <div className="relative">
+                                            <input
+                                                type={showPasswords ? 'text' : 'password'}
+                                                value={currentPassword}
+                                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                                className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPasswords(!showPasswords)}
+                                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600"
+                                            >
+                                                {showPasswords ? <EyeOff size={20} /> : <Eye size={20} />}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-2">
+                                                كلمة المرور الجديدة
+                                            </label>
+                                            <input
+                                                type={showPasswords ? 'text' : 'password'}
+                                                value={newPassword}
+                                                onChange={(e) => setNewPassword(e.target.value)}
+                                                className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-stone-700 mb-2">
+                                                تأكيد كلمة المرور الجديدة
+                                            </label>
+                                            <input
+                                                type={showPasswords ? 'text' : 'password'}
+                                                value={confirmPassword}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button
+                                            onClick={handlePasswordChange}
+                                            disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                                            className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
+                                        >
+                                            {saving ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                                    جاري التغيير...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save size={16} />
+                                                    تغيير كلمة المرور
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )
+                }
+
+                {/* Email & Notifications Tab */}
+                {
+                    activeTab === 'notifications' && systemSettings && (
                         <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                             <div className="p-6 border-b border-stone-100">
                                 <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                                    <User size={20} className="text-amber-600" />
-                                    معلومات الحساب
+                                    <Mail size={20} className="text-primary" />
+                                    إعدادات البريد الإلكتروني والإشعارات
                                 </h2>
                             </div>
                             <div className="p-6 space-y-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                                        الاسم
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={accountSettings.name}
-                                        onChange={(e) => setAccountSettings({
-                                            ...accountSettings,
-                                            name: e.target.value
-                                        })}
-                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                    />
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                                            بريد الاتصال العام
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={systemSettings.contactEmail}
+                                            onChange={(e) => setSystemSettings({
+                                                ...systemSettings,
+                                                contactEmail: e.target.value
+                                            })}
+                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            placeholder="contact@example.com"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-stone-700 mb-2">
+                                            بريد الإشعارات (اختياري)
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={systemSettings.notificationEmail || ''}
+                                            onChange={(e) => setSystemSettings({
+                                                ...systemSettings,
+                                                notificationEmail: e.target.value
+                                            })}
+                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                            placeholder="notifications@example.com"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                                        البريد الإلكتروني
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={accountSettings.email}
-                                        onChange={(e) => setAccountSettings({
-                                            ...accountSettings,
-                                            email: e.target.value
-                                        })}
-                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                    />
+                                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                                    <div className="flex items-start gap-3">
+                                        <Bell size={20} className="text-primary mt-0.5" />
+                                        <div>
+                                            <h3 className="font-medium text-primary-dark mb-1">ملاحظة</h3>
+                                            <p className="text-sm text-primary-dark">
+                                                بريد الاتصال العام سيظهر في صفحة التواصل، بينما بريد الإشعارات سيُستخدم لإرسال تنبيهات المستقبلية.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="flex justify-end">
                                     <button
-                                        onClick={() => handleSave('account')}
+                                        onClick={() => handleSave('system')}
                                         disabled={saving}
                                         className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
                                     >
@@ -389,239 +666,90 @@ export default function SettingsPage() {
                                         ) : (
                                             <>
                                                 <Save size={16} />
-                                                حفظ المعلومات
+                                                حفظ الإعدادات
                                             </>
                                         )}
                                     </button>
                                 </div>
                             </div>
                         </div>
+                    )
+                }
 
-                        {/* Password Change */}
+                {/* System Tab */}
+                {
+                    activeTab === 'system' && systemSettings && (
                         <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
                             <div className="p-6 border-b border-stone-100">
                                 <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                                    <Lock size={20} className="text-amber-600" />
-                                    تغيير كلمة المرور
+                                    <Globe size={20} className="text-primary" />
+                                    إعدادات النظام
                                 </h2>
                             </div>
                             <div className="p-6 space-y-6">
                                 <div>
                                     <label className="block text-sm font-medium text-stone-700 mb-2">
-                                        كلمة المرور الحالية
+                                        عنوان الموقع
                                     </label>
-                                    <div className="relative">
-                                        <input
-                                            type={showPasswords ? 'text' : 'password'}
-                                            value={currentPassword}
-                                            onChange={(e) => setCurrentPassword(e.target.value)}
-                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPasswords(!showPasswords)}
-                                            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-stone-400 hover:text-stone-600"
-                                        >
-                                            {showPasswords ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
+                                    <input
+                                        type="text"
+                                        value={systemSettings.siteTitle}
+                                        onChange={(e) => setSystemSettings({
+                                            ...systemSettings,
+                                            siteTitle: e.target.value
+                                        })}
+                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    />
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-2">
-                                            كلمة المرور الجديدة
-                                        </label>
-                                        <input
-                                            type={showPasswords ? 'text' : 'password'}
-                                            value={newPassword}
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-medium text-stone-700 mb-2">
-                                            تأكيد كلمة المرور الجديدة
-                                        </label>
-                                        <input
-                                            type={showPasswords ? 'text' : 'password'}
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                        />
+                                <div>
+                                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                                        وصف الموقع
+                                    </label>
+                                    <textarea
+                                        value={systemSettings.siteDescription}
+                                        onChange={(e) => setSystemSettings({
+                                            ...systemSettings,
+                                            siteDescription: e.target.value
+                                        })}
+                                        rows={3}
+                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div className="flex items-start gap-3">
+                                        <Globe size={20} className="text-blue-600 mt-0.5" />
+                                        <div>
+                                            <h3 className="font-medium text-blue-900 mb-1">معلومات SEO</h3>
+                                            <p className="text-sm text-blue-700">
+                                                عنوان الموقع والوصف سيُستخدمان في محركات البحث والوسوم الوصفية.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="flex justify-end">
                                     <button
-                                        onClick={handlePasswordChange}
-                                        disabled={saving || !currentPassword || !newPassword || !confirmPassword}
+                                        onClick={() => handleSave('system')}
+                                        disabled={saving}
                                         className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
                                     >
                                         {saving ? (
                                             <>
                                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                                جاري التغيير...
+                                                جاري الحفظ...
                                             </>
                                         ) : (
                                             <>
                                                 <Save size={16} />
-                                                تغيير كلمة المرور
+                                                حفظ إعدادات النظام
                                             </>
                                         )}
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                )}
-
-                {/* Email & Notifications Tab */}
-                {activeTab === 'notifications' && systemSettings && (
-                    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-                        <div className="p-6 border-b border-stone-100">
-                            <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                                <Mail size={20} className="text-amber-600" />
-                                إعدادات البريد الإلكتروني والإشعارات
-                            </h2>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                                        بريد الاتصال العام
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={systemSettings.contactEmail}
-                                        onChange={(e) => setSystemSettings({
-                                            ...systemSettings,
-                                            contactEmail: e.target.value
-                                        })}
-                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                        placeholder="contact@example.com"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-stone-700 mb-2">
-                                        بريد الإشعارات (اختياري)
-                                    </label>
-                                    <input
-                                        type="email"
-                                        value={systemSettings.notificationEmail || ''}
-                                        onChange={(e) => setSystemSettings({
-                                            ...systemSettings,
-                                            notificationEmail: e.target.value
-                                        })}
-                                        className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                        placeholder="notifications@example.com"
-                                    />
-                                </div>
-                            </div>
-                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                                <div className="flex items-start gap-3">
-                                    <Bell size={20} className="text-amber-600 mt-0.5" />
-                                    <div>
-                                        <h3 className="font-medium text-amber-900 mb-1">ملاحظة</h3>
-                                        <p className="text-sm text-amber-700">
-                                            بريد الاتصال العام سيظهر في صفحة التواصل، بينما بريد الإشعارات سيُستخدم لإرسال تنبيهات المستقبلية.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={() => handleSave('system')}
-                                    disabled={saving}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            جاري الحفظ...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save size={16} />
-                                            حفظ الإعدادات
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* System Tab */}
-                {activeTab === 'system' && systemSettings && (
-                    <div className="bg-white rounded-xl border border-stone-200 overflow-hidden">
-                        <div className="p-6 border-b border-stone-100">
-                            <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2">
-                                <Globe size={20} className="text-amber-600" />
-                                إعدادات النظام
-                            </h2>
-                        </div>
-                        <div className="p-6 space-y-6">
-                            <div>
-                                <label className="block text-sm font-medium text-stone-700 mb-2">
-                                    عنوان الموقع
-                                </label>
-                                <input
-                                    type="text"
-                                    value={systemSettings.siteTitle}
-                                    onChange={(e) => setSystemSettings({
-                                        ...systemSettings,
-                                        siteTitle: e.target.value
-                                    })}
-                                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-stone-700 mb-2">
-                                    وصف الموقع
-                                </label>
-                                <textarea
-                                    value={systemSettings.siteDescription}
-                                    onChange={(e) => setSystemSettings({
-                                        ...systemSettings,
-                                        siteDescription: e.target.value
-                                    })}
-                                    rows={3}
-                                    className="w-full px-4 py-2 border border-stone-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
-                                />
-                            </div>
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <div className="flex items-start gap-3">
-                                    <Globe size={20} className="text-blue-600 mt-0.5" />
-                                    <div>
-                                        <h3 className="font-medium text-blue-900 mb-1">معلومات SEO</h3>
-                                        <p className="text-sm text-blue-700">
-                                            عنوان الموقع والوصف سيُستخدمان في محركات البحث والوسوم الوصفية.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={() => handleSave('system')}
-                                    disabled={saving}
-                                    className="inline-flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 disabled:bg-stone-400 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                            جاري الحفظ...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Save size={16} />
-                                            حفظ إعدادات النظام
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    )
+                }
+            </div >
+        </div >
     );
 }

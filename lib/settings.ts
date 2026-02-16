@@ -46,6 +46,9 @@ export interface HomeSettings {
 export interface AppearanceSettings {
     primaryColor: string;
     secondaryColor?: string;
+    buttonColor?: string;
+    buttonTextColor?: string;
+    cardTitleColor?: string;
     postsPerPage: number;
     updatedAt: FirestoreTimestamp;
     createdAt: FirestoreTimestamp;
@@ -100,6 +103,9 @@ const defaultHomeSettings: Omit<HomeSettings, 'updatedAt' | 'createdAt'> = {
 const defaultAppearanceSettings: Omit<AppearanceSettings, 'updatedAt' | 'createdAt'> = {
     primaryColor: '#d97706',
     secondaryColor: '#78716c',
+    buttonColor: '#d97706',
+    buttonTextColor: '#ffffff',
+    cardTitleColor: '#d97706',
     postsPerPage: 12
 };
 
