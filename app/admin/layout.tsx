@@ -20,7 +20,8 @@ import {
     Home,
     UserCircle,
     PanelRightOpen,
-    PanelRightClose
+    PanelRightClose,
+    Upload
 } from 'lucide-react';
 
 export default function AdminLayout({

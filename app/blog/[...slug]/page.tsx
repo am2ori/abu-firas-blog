@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -6,47 +7,51 @@ import MarkdownViewer from "@/components/markdown-viewer";
 import ShareButtons from "@/components/share-buttons";
 import SuggestedPosts from "@/components/suggested-posts";
 import { Post } from "@/types";
+import { getCategory } from "@/lib/categories";
 
 import { collection, doc, getDoc, getDocs, query, where, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-// Fetch post from Firestore by slug
 // Fetch post from Firestore by slug or ID
-async function getPost(rawSlugOrId: string): Promise<Post | null> {
-    // Decode the slug to handle Arabic characters correctly
-    const slugOrId = decodeURIComponent(rawSlugOrId);
+async function getPost(slugParam: string | string[]): Promise<Post | null> {
+    const postsRef = collection(db, "posts");
 
+    // 1. Construct potential slug candidates
+    const rawSegments = Array.isArray(slugParam) ? slugParam : [slugParam];
+    const segments = rawSegments.map(s => decodeURIComponent(s));
+
+    const fullSlug = segments.join('/');         // e.g. "2025/05/my-post"
+    const lastSegment = segments[segments.length - 1]; // e.g. "my-post"
 
     try {
-        const postsRef = collection(db, "posts");
-
-        // 1. Try finding by slug
-        const q = query(postsRef, where("slug", "==", slugOrId));
-        const snapshot = await getDocs(q);
+        // Strategy A: Exact match for the full URL path (Legacy support)
+        let q = query(postsRef, where("slug", "==", fullSlug));
+        let snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-
             const doc = snapshot.docs[0];
-            return {
-                id: doc.id,
-                ...doc.data()
-            } as Post;
+            return { id: doc.id, ...doc.data() } as Post;
         }
 
-        // 2. Fallback: Try finding by Document ID
-        // Only try this if the string looks like a potential ID (alphanumeric check is optional but safer)
+        // Strategy B: Match by the last segment only (Modern/Clean URL support)
+        // This handles cases where the DB has clean slugs "my-post" but the URL is "2025/05/my-post"
+        if (fullSlug !== lastSegment) {
+            q = query(postsRef, where("slug", "==", lastSegment));
+            snapshot = await getDocs(q);
 
-        const docRef = doc(db, "posts", slugOrId);
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                return { id: doc.id, ...doc.data() } as Post;
+            }
+        }
+
+        // Strategy C: Fallback to Document ID (using the last segment)
+        const docRef = doc(db, "posts", lastSegment);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-
-            return {
-                id: docSnap.id,
-                ...docSnap.data()
-            } as Post;
+            return { id: docSnap.id, ...docSnap.data() } as Post;
         }
-
 
         return null;
     } catch (error) {
@@ -108,7 +113,7 @@ async function getSuggestedPosts(currentPost: Post): Promise<Post[]> {
     }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }) {
     const { slug } = await params;
     const post = await getPost(slug);
     if (!post) return {};
@@ -119,12 +124,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
 }
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string[] }> }) {
     const { slug } = await params;
+
+    // Pass the full slug array to getPost (which handles legacy vs modern lookups)
     const post = await getPost(slug);
 
     if (!post) {
         notFound();
+    }
+
+    // Get category name
+    let categoryName = 'عام';
+    if (post.categoryId) {
+        const category = await getCategory(post.categoryId);
+        if (category) {
+            categoryName = category.name;
+        }
     }
 
     // Get suggested posts
@@ -141,9 +157,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
                 <header className="mb-8 border-b border-stone-100 pb-8">
                     <div className="flex gap-2 text-sm text-stone-500 mb-4">
-                        <span>{new Date(post.publishedAt!.seconds * 1000).toLocaleDateString("ar-EG")}</span>
+                        <span>{post.publishedAt ? new Date(post.publishedAt.seconds * 1000).toLocaleDateString("ar-EG") : ''}</span>
                         <span>•</span>
-                        <span className="text-amber-800 font-medium">السفر والترحال</span>
+                        <Link href={`/blog/category/${post.categoryId}`} className="text-amber-800 font-medium hover:underline">
+                            {categoryName}
+                        </Link>
                     </div>
                     <h1 className="text-4xl font-bold text-stone-900 leading-tight mb-4">{post.title}</h1>
                 </header>
@@ -167,7 +185,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 <div className="mt-12 pt-8 border-t border-stone-200">
                     <h3 className="text-lg font-bold text-stone-800 mb-3">الوسوم:</h3>
                     <div className="flex flex-wrap gap-2">
-                        {post.tags.map(tag => (
+                        {post.tags && post.tags.map(tag => (
                             <span key={tag} className="px-3 py-1 bg-stone-100 text-stone-600 rounded-full text-sm">#{tag}</span>
                         ))}
                     </div>
