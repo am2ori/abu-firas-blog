@@ -108,13 +108,15 @@ export default function HomeContent() {
                                 <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-sm font-medium mb-6">
                                     👋 مرحباً بك في مدونتي
                                 </span>
-                                <h1 className="text-4xl md:text-6xl font-bold text-stone-900 mb-6 leading-tight">
-                                    {homeSettings?.heroContent?.heroTitle || 'أنا <span className="text-amber-600">عبدالعظيم أبو فراس</span>'}
-                                </h1>
+                                <h1
+                                    className="text-4xl md:text-6xl font-bold text-stone-900 mb-6 leading-tight"
+                                    dangerouslySetInnerHTML={{ __html: homeSettings?.heroContent?.heroTitle || 'أنا <span class="text-amber-600">عبدالعظيم أبو فراس</span>' }}
+                                />
                                 <div className="text-xl md:text-2xl text-stone-700 leading-relaxed mb-8 max-w-3xl mx-auto">
-                                    <blockquote className="border-r-4 border-amber-400 pr-6 pl-4">
-                                        &quot;{homeSettings?.heroContent?.heroSubtitle || 'أستنير بالحرف في مدلهمات الحياة، أسير في بساتين الكتب وأقطف منها ما يروقني، أسافر أحياناً وأُدوّن عن نثريات السفر وفرائده.'}&quot;
-                                    </blockquote>
+                                    <blockquote
+                                        className="border-r-4 border-amber-400 pr-6 pl-4"
+                                        dangerouslySetInnerHTML={{ __html: `&quot;${homeSettings?.heroContent?.heroSubtitle || 'أستنير بالحرف في مدلهمات الحياة، أسير في بساتين الكتب وأقطف منها ما يروقني، أسافر أحياناً وأُدوّن عن نثريات السفر وفرائده.'}&quot;` }}
+                                    />
                                 </div>
                                 {homeSettings?.heroContent?.ctaButton?.text && (
                                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
